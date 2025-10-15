@@ -37,7 +37,7 @@ function CheckoutPayment() {
   }
 
   const buildInvoiceHtml = (orderId, paymentId) => {
-    const rows = cartItems.map(it => `<tr><td>${it.name} (${it.size})</td><td>${it.quantity}</td><td>₹${it.price}</td><td>₹${it.price * it.quantity}</td></tr>`).join('')
+    const rows = cartItems.map(it => `<tr><td>${it.name} (${it.size})${it.sku ? `<br/><small>SKU: ${it.sku}</small>` : ''}</td><td>${it.quantity}</td><td>₹${it.price}</td><td>₹${it.price * it.quantity}</td></tr>`).join('')
     const deliv = deliveryInfo?.deliveryPrice || 0
     const subtotal = getCartTotal()
     const savings = getCartSavings()
@@ -490,7 +490,7 @@ function CheckoutPayment() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-900 truncate">{item.name}</h4>
-                        <p className="text-sm text-gray-600">{item.size}</p>
+                        <p className="text-sm text-gray-600">{item.size}{item.sku ? ` · SKU: ${item.sku}` : ''}</p>
                         <p className="text-sm font-semibold text-green-800">₹{item.price} × {item.quantity}</p>
                       </div>
                     </div>

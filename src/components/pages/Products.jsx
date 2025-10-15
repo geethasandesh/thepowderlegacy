@@ -19,7 +19,7 @@ function Products() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedProductSizes, setSelectedProductSizes] = useState({})
   const [sortBy, setSortBy] = useState('name')
-  const [viewMode, setViewMode] = useState('list')
+  const [viewMode, setViewMode] = useState('grid')
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [favorites, setFavorites] = useState(() => {
@@ -406,7 +406,7 @@ function Products() {
 
               // Grid View
               return (
-                <div key={product.id} className="group bg-white rounded-md sm:rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-stone-100">
+                <div key={product.id} className="group h-full flex flex-col bg-white rounded-md sm:rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-stone-100">
                   <Link to={`/shop/product/${product.id}`} className="block relative">
                     <div className="aspect-square bg-gradient-to-br from-stone-50 to-stone-100 overflow-hidden">
                       {product.images?.[0] ? (
@@ -435,7 +435,7 @@ function Products() {
                     </button>
                   </Link>
 
-                  <div className="p-1.5 sm:p-2 lg:p-3">
+                  <div className="p-1.5 sm:p-2 lg:p-3 flex flex-col h-full">
                     <Link to={`/shop/product/${product.id}`}>
                       <h3 className="font-medium text-[10px] sm:text-xs lg:text-sm text-stone-900 mb-0.5 group-hover:text-[#2d5f3f] transition-colors line-clamp-2 leading-tight">
                         {product.name}
@@ -466,25 +466,27 @@ function Products() {
                       </div>
                     )}
 
-                    {product.type === 'bundle' ? (
-                      <Link
-                        to={`shop/product/${product.id}`}
-                        className="w-full bg-[#2d5f3f] text-white py-1 sm:py-1.5 text-[9px] sm:text-[10px] font-medium rounded flex items-center justify-center gap-0.5 hover:bg-[#1e4a2f] transition-colors"
-                      >
-                        <span className="text-xs">🎁</span>
-                        <span className="hidden sm:inline">Customize</span>
-                        <span className="sm:hidden">Customize</span>
-                      </Link>
-                    ) : (
-                      <button
-                        onClick={() => handleAddToCart(product)}
-                        className="w-full bg-[#2d5f3f] text-white py-1 sm:py-1.5 text-[9px] sm:text-[10px] font-medium rounded flex items-center justify-center gap-0.5 hover:bg-[#1e4a2f] transition-colors"
-                      >
-                        <ShoppingCart size={8} className="sm:w-2.5 sm:h-2.5" />
-                        <span className="hidden sm:inline">Add to Cart</span>
-                        <span className="sm:hidden">Add</span>
-                      </button>
-                    )}
+                    <div className="mt-auto">
+                      {product.type === 'bundle' ? (
+                        <Link
+                          to={`shop/product/${product.id}`}
+                          className="w-full bg-[#2d5f3f] text-white py-1 sm:py-1.5 text-[9px] sm:text-[10px] font-medium rounded flex items-center justify-center gap-0.5 hover:bg-[#1e4a2f] transition-colors"
+                        >
+                          <span className="text-xs">🎁</span>
+                          <span className="hidden sm:inline">Customize</span>
+                          <span className="sm:hidden">Customize</span>
+                        </Link>
+                      ) : (
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          className="w-full bg-[#2d5f3f] text-white py-1 sm:py-1.5 text-[9px] sm:text-[10px] font-medium rounded flex items-center justify-center gap-0.5 hover:bg-[#1e4a2f] transition-colors"
+                        >
+                          <ShoppingCart size={8} className="sm:w-2.5 sm:h-2.5" />
+                          <span className="hidden sm:inline">Add to Cart</span>
+                          <span className="sm:hidden">Add</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               )

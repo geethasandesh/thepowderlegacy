@@ -55,7 +55,7 @@ function ProductsManager() {
       benefits: '',
       ingredients: '',
       keyBenefits: '',
-      sizes: [{ size: '200g', weight: '0.20 kg', price: 400, stock: 50 }],
+      sizes: [{ sku: '', size: '200g', weight: '0.20 kg', price: 400, stock: 50 }],
       rating: 4.5,
       reviews: 0,
       images: [],
@@ -111,7 +111,7 @@ function ProductsManager() {
   const addSize = () => {
     setEditingProduct({
       ...editingProduct,
-      sizes: [...editingProduct.sizes, { size: '', weight: '', price: 0, stock: 0 }]
+      sizes: [...editingProduct.sizes, { sku: '', size: '', weight: '', price: 0, stock: 0 }]
     })
   }
 
@@ -341,6 +341,13 @@ function ProductsManager() {
               <div className="space-y-2">
                 {editingProduct.sizes.map((size, index) => (
                   <div key={index} className="flex gap-2 items-center bg-gray-50 p-3 rounded-lg">
+                    <input
+                      type="text"
+                      placeholder="SKU (e.g., TPL-SC-001-200)"
+                      value={size.sku || ''}
+                      onChange={(e) => updateSize(index, 'sku', e.target.value)}
+                      className="w-40 px-3 py-2 border border-gray-300 rounded-lg"
+                    />
                     <input
                       type="text"
                       placeholder="Size (e.g., 200g)"
