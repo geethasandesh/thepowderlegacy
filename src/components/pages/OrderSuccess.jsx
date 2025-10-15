@@ -105,7 +105,7 @@ function OrderSuccess() {
               Continue Shopping
             </Link>
             <Link
-              to="/"
+              to="/home"
               className="border border-green-800 text-green-800 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors"
             >
               Back to Home

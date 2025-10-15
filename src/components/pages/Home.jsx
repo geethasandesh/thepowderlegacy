@@ -21,7 +21,8 @@ function Home() {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const list = await fetchProducts({})
+      // Force refresh to get latest product order from admin
+      const list = await fetchProducts({ forceRefresh: true })
       const top = [...list].filter(p => p.type !== 'bundle').sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 8)
       if (!cancelled) setFeaturedProducts(top)
     }

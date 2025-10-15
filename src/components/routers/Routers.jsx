@@ -23,13 +23,15 @@ import ScrollToTop from '../ScrollToTop'
 import AdminLogin from '../pages/AdminLogin'
 import AdminDashboard from '../pages/AdminDashboard'
 import ProtectedAdminRoute from '../admin/ProtectedAdminRoute'
+import BundlePage from '../pages/BundlePage'
 
 function Routers() {
   return (
     <div>
         <ScrollToTop />
         <Routes>
-            <Route path='/' element={<Home />} />
+            <Route path='/' element={<Products />} />
+            <Route path='/home' element={<Home />} />
             <Route path='/about' element={<About />} />
             <Route path='/about/our-story' element={<About />} />
             <Route path='/about/manufacturing' element={<About />} />
@@ -40,6 +42,7 @@ function Routers() {
             <Route path='/shop/hair-care' element={<Products />} />
             <Route path='/shop/oral-care' element={<Products />} />
             <Route path='/shop/product/:id' element={<ProductDetail />} />
+            <Route path='/bundle/:id' element={<BundlePage />} />
             <Route path='/contact' element={<Contact />} />
             <Route path='/cart' element={<Cart />} />
             <Route path='/checkout/address' element={<CheckoutAddress />} />

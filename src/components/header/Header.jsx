@@ -23,7 +23,7 @@ function Header() {
   }, [])
 
   const navigation = [
-    { name: 'Home', href: '/' },
+    { name: 'Home', href: '/home' },
     { 
       name: 'Shop', 
       href: '/shop', 

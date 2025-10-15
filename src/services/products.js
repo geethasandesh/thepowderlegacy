@@ -2,18 +2,24 @@ import { productsData } from '../data/products'
 import { loadProductsFromSupabase } from './supabase-cms'
 
 export async function fetchProducts(filters = {}) {
-  // filters: { category, size, search, limitCount }
+  // filters: { category, size, search, limitCount, forceRefresh }
   
   let products = []
   
   try {
+    // Check if we should force refresh (bypass cache)
+    if (filters.forceRefresh) {
+      console.log('🔄 Force refreshing products from database')
+      localStorage.removeItem('products_data') // Clear cache
+    }
+    
     // Check localStorage cache first for performance
     const cachedProducts = localStorage.getItem('products_data')
-    if (cachedProducts) {
+    if (cachedProducts && !filters.forceRefresh) {
       products = JSON.parse(cachedProducts)
       console.log('🔄 Using cached product data')
     } else {
-      // Try to load from Supabase if not cached
+      // Try to load from Supabase if not cached or force refresh
       try {
         const supabaseProducts = await loadProductsFromSupabase()
         if (supabaseProducts && supabaseProducts.length > 0) {
@@ -93,4 +99,10 @@ export async function fetchRelated(product, count = 4) {
   if (!product) return []
   const items = await fetchProducts({ category: product.category, limitCount: count + 1 })
   return items.filter(p => p.id !== product.id).slice(0, count)
+}
+
+export function clearProductsCache() {
+  console.log('🗑️ Clearing products cache')
+  localStorage.removeItem('products_data')
+  localStorage.removeItem('admin_products')
 }

@@ -28,7 +28,7 @@ export async function saveProductsToSupabase(products) {
     localStorage.setItem('products_data', JSON.stringify(products))
     localStorage.setItem('admin_products', JSON.stringify(products))
 
-    console.log('✅ Products saved to Supabase')
+    console.log('✅ Products saved to Supabase - cache updated')
     return { success: true }
   } catch (error) {
     console.error('❌ Error saving products to Supabase:', error)

@@ -149,7 +149,7 @@ function ProductDetail() {
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center text-sm text-gray-600">
-          <Link to="/" className="hover:text-emerald-700">Home</Link>
+          <Link to="/home" className="hover:text-emerald-700">Home</Link>
           <span className="mx-2">/</span>
           <Link to="/shop" className="hover:text-emerald-700">Store</Link>
           <span className="mx-2">/</span>
