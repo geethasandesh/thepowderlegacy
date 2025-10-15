@@ -144,7 +144,7 @@ function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
             {[
-              { name: "Skin Care", href: "/shop/skin-care", image: "/4849388.jpg", desc: "Natural bath powders & face care" },
+              { name: "Skin Care", href: "/shop/skin-care", image: "/face.jpg", desc: "Natural bath powders & face care" },
               { name: "Hair Care", href: "/shop/hair-care", image: "/hair.jpg", desc: "Strengthen & nourish your hair" },
               { name: "Oral Care", href: "/shop/oral-care", image: "/18965903.jpg", desc: "Traditional tooth powders" }
             ].map((category, idx) => (
@@ -326,12 +326,12 @@ function Home() {
               
               
               { 
-                name: "Sunita Reddy", 
-                location: "Bangalore, Karnataka",
-                avatar: "SR",
-                customerImage: "/reviews/000000.png", // Correct path for images in public/reviews folder
+                name: "Ramya", 
+                location: "Hyderabad",
+                avatar: "R",
+                customerImage: "/reviews/r3.jpg", // Correct path for images in public/reviews folder
                 rating: 5, 
-                comment: "Authentic quality and traditional recipes. Love that they're chemical-free and safe for my entire family. Highly recommended!" 
+                comment: "Highly recommended!" 
               }
              ].map((testimonial, idx) => (
                <motion.div
