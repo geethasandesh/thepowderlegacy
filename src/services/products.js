@@ -40,11 +40,6 @@ export async function fetchProducts(filters = {}) {
     products = products.filter(p => p.category === filters.category)
   }
 
-  // Apply limit
-  if (filters.limitCount) {
-    products = products.slice(0, filters.limitCount)
-  }
-
   // client search filter
   if (filters.search) {
     const key = String(filters.search).toLowerCase()
@@ -55,6 +50,19 @@ export async function fetchProducts(filters = {}) {
       p.category?.toLowerCase().includes(key)
     )
   }
+
+  // Sort by priority (higher priority first), then by name
+  products.sort((a, b) => {
+    const priorityDiff = (b.priority || 0) - (a.priority || 0)
+    if (priorityDiff !== 0) return priorityDiff
+    return (a.name || '').localeCompare(b.name || '')
+  })
+
+  // Apply limit after sorting
+  if (filters.limitCount) {
+    products = products.slice(0, filters.limitCount)
+  }
+
   return products
 }
 

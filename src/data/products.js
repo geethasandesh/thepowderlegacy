@@ -3,7 +3,8 @@ export const productsData = [
   { 
     id: 1, 
     name: "Sassy Sunnipindi", 
-    category: "skin-care", 
+    category: "skin-care",
+    priority: 0, // 0 = normal priority, higher numbers appear first
     description: "Traditional bath powder for glowing skin. Experience the timeless beauty secrets of India with our authentic Sunnipindi formulation.",
     fullDescription: "Sassy Sunnipindi is a traditional herbal bath powder that has been used for centuries in Indian households. This unique blend combines the finest natural ingredients to provide you with radiant, glowing skin. The powder works gently to exfoliate dead skin cells, brighten your complexion, and leave your skin feeling soft and refreshed. Regular use helps maintain skin health and brings out your natural glow.",
     benefits: "Natural cleansing, skin brightening, gentle exfoliation, anti-aging properties",
@@ -30,7 +31,8 @@ export const productsData = [
   { 
     id: 2, 
     name: "Authentic Avarampoo", 
-    category: "skin-care", 
+    category: "skin-care",
+    priority: 0,
     description: "Natural skin care powder with Avarampoo. Embrace the authentic tradition of natural skincare with pure Avarampoo.",
     fullDescription: "Authentic Avarampoo powder is crafted from the finest Avarampoo flowers, known for their exceptional skin benefits. This traditional formulation has been trusted for generations to provide natural nourishment and a healthy glow. The unique properties of Avarampoo help in maintaining skin elasticity, reducing signs of aging, and promoting an even skin tone.",
     benefits: "Anti-aging, skin nourishment, natural glow, even skin tone",
@@ -57,7 +59,8 @@ export const productsData = [
   { 
     id: 3, 
     name: "Multani Marvel", 
-    category: "skin-care", 
+    category: "skin-care",
+    priority: 0,
     description: "Premium Multani Mitti powder for skin care. Detoxify and renew your complexion with this potent clay-based powder.",
     fullDescription: "Multani Marvel is a potent clay-based powder designed specifically for oily and combination skin. Featuring Multani Mitti (Fuller's Earth), this natural formula absorbs impurities and excess sebum while soothing acne-related irritations. It brightens the skin and refines texture, resulting in a smoother, clearer complexion. Ideal for those seeking an effective deep-cleanse and oil control with Ayurvedic care.",
     benefits: "Deep cleansing, oil control, skin detoxification, pore refinement",
@@ -84,7 +87,8 @@ export const productsData = [
   { 
     id: 4, 
     name: "Serene Sandalwood", 
-    category: "skin-care", 
+    category: "skin-care",
+    priority: 0,
     description: "Pure sandalwood powder for radiant skin. Experience the luxury of pure sandalwood for a naturally radiant complexion.",
     fullDescription: "Serene Sandalwood brings you the finest quality sandalwood powder, revered for centuries for its skin-enhancing properties. This premium formulation provides a cooling effect, soothes irritated skin, and imparts a natural, healthy glow. The aromatic sandalwood not only benefits your skin but also provides a calming, meditative experience during your skincare routine.",
     benefits: "Cooling effect, skin soothing, natural fragrance, anti-inflammatory",
@@ -111,7 +115,8 @@ export const productsData = [
   { 
     id: 5, 
     name: "Neem Nourish", 
-    category: "skin-care", 
+    category: "skin-care",
+    priority: 0,
     description: "Neem-based skin care powder. Harness the antibacterial power of neem for clear, healthy skin.",
     fullDescription: "Neem Nourish is formulated with pure neem powder, known for its powerful antibacterial and antifungal properties. This natural remedy is perfect for acne-prone skin, helping to purify, heal, and prevent breakouts. The blend of traditional herbs works synergistically to detoxify the skin, reduce inflammation, and promote a clear, blemish-free complexion.",
     benefits: "Antibacterial, acne treatment, skin purification, reduces inflammation",
@@ -138,7 +143,8 @@ export const productsData = [
   { 
     id: 6, 
     name: "Vibrant Vetiver", 
-    category: "skin-care", 
+    category: "skin-care",
+    priority: 0,
     description: "Vetiver root powder for skin wellness. Cool and refresh your skin with the natural goodness of vetiver.",
     fullDescription: "Vibrant Vetiver is a unique formulation featuring the cooling and aromatic properties of vetiver root. Known for its ability to calm and refresh the skin, this powder is ideal for hot climates and stressed skin. The natural fragrance provides aromatherapy benefits while the powder works to improve skin texture and tone.",
     benefits: "Skin cooling, natural fragrance, stress relief, improves skin texture",
@@ -165,7 +171,8 @@ export const productsData = [
   { 
     id: 7, 
     name: "Anti Hairfall", 
-    category: "hair-care", 
+    category: "hair-care",
+    priority: 0,
     description: "Natural hair fall control powder. Strengthen your hair from the roots and reduce hair fall naturally.",
     fullDescription: "Anti Hairfall powder is a powerful blend of Ayurvedic herbs specifically formulated to combat hair fall and promote hair growth. Rich in proteins and vitamins, this natural treatment strengthens hair roots, improves scalp health, and stimulates new hair growth. Regular use results in thicker, stronger, and healthier hair.",
     benefits: "Strengthens roots, reduces hair fall, promotes growth, adds volume",
@@ -189,7 +196,8 @@ export const productsData = [
   { 
     id: 8, 
     name: "Anti Oily", 
-    category: "hair-care", 
+    category: "hair-care",
+    priority: 0,
     description: "Natural solution for oily hair. Control excess oil and enjoy fresh, voluminous hair.",
     fullDescription: "Anti Oily hair powder is specially formulated to tackle excessive oil production in the scalp. This natural blend absorbs excess sebum, adds volume to flat hair, and maintains scalp health. The gentle yet effective formula cleanses without stripping natural oils, leaving your hair feeling fresh and bouncy all day long.",
     benefits: "Controls oil production, adds volume, scalp health, maintains freshness",
@@ -213,7 +221,8 @@ export const productsData = [
   { 
     id: 9, 
     name: "Anti Dandruff", 
-    category: "hair-care", 
+    category: "hair-care",
+    priority: 0,
     description: "Natural dandruff treatment powder. Say goodbye to flakes and itching with this powerful herbal blend.",
     fullDescription: "Anti Dandruff powder is a therapeutic blend of herbs known for their antifungal and soothing properties. This natural treatment effectively fights dandruff, soothes scalp irritation, and prevents flakes from recurring. Regular use promotes a healthy, clean scalp and beautiful, dandruff-free hair.",
     benefits: "Fights dandruff, soothes scalp, prevents flakes, antimicrobial action",
@@ -237,7 +246,8 @@ export const productsData = [
   { 
     id: 10, 
     name: "Smitha Manjan", 
-    category: "oral-care", 
+    category: "oral-care",
+    priority: 0,
     description: "Traditional tooth powder for oral hygiene. Achieve naturally white teeth and healthy gums with this time-tested formula.",
     fullDescription: "Smitha Manjan is a traditional tooth powder that combines ancient wisdom with natural ingredients for complete oral care. This unique formulation helps whiten teeth naturally, strengthens gums, prevents cavities, and ensures long-lasting fresh breath. Free from harsh chemicals, it's a gentle yet effective alternative to modern toothpaste.",
     benefits: "Natural whitening, gum health, fresh breath, cavity prevention",
@@ -260,7 +270,8 @@ export const productsData = [
   { 
     id: 11, 
     name: "Radiant Rose", 
-    category: "skin-care", 
+    category: "skin-care",
+    priority: 0,
     description: "Rose petal powder for radiant skin. Indulge in the luxury of roses for naturally radiant and youthful skin.",
     fullDescription: "Radiant Rose is a luxurious blend featuring pure rose petals combined with traditional herbs for ultimate skin radiance. Roses have been celebrated for centuries for their skin-beautifying properties. This powder helps tone the skin, reduce pigmentation, and impart a natural rosy glow while providing deep hydration and nourishment.",
     benefits: "Skin radiance, anti-aging, hydration, natural glow",
@@ -286,6 +297,7 @@ export const productsData = [
     name: "Diwali Delight Hamper",
     category: "gift-hamper",
     type: "bundle", // Special type for bundle products
+    priority: 100, // HIGH PRIORITY - Will appear first in listings
     description: "Celebrate Diwali with our customizable gift hamper! Choose your favorite products and get 2 beautiful colorful diyas included.",
     fullDescription: "Make this Diwali extra special with our Diwali Delight Hamper. Customize your perfect gift by selecting your favorite herbal powders from our premium collection. Each hamper comes with 2 handcrafted colorful diyas to light up your celebrations. Perfect for gifting to loved ones or treating yourself to a complete wellness package.",
     benefits: "Customizable selection, festive gift packaging, includes decorative diyas, perfect for gifting",

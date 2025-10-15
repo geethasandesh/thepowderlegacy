@@ -302,7 +302,7 @@ function Home() {
                 name: "Priya Sharma", 
                 location: "Mumbai, Maharashtra",
                 avatar: "PS",
-                customerImage: "/reviews/door.jpg", // Correct path for images in public/reviews folder
+                customerImage: "/reviews/r1.jpg", // Correct path for images in public/reviews folder
                 rating: 5, 
                 comment: "The Sassy Sunnipindi transformed my skin! Completely natural and so effective. I've recommended it to all my friends." 
               },
@@ -310,7 +310,7 @@ function Home() {
                 name: "Rajesh Kumar", 
                 location: "Delhi NCR",
                 avatar: "RK",
-                customerImage: "/reviews/ddddd.jpg", // Correct path for images in public/reviews folder
+                customerImage: "/reviews/r2.jpg", // Correct path for images in public/reviews folder
                 rating: 5, 
                 comment: "Anti Hairfall powder is a game-changer. Natural ingredients, visible results. My hair feels stronger and healthier than ever!" 
               },
@@ -318,7 +318,7 @@ function Home() {
                 name: "Sunita Reddy", 
                 location: "Bangalore, Karnataka",
                 avatar: "SR",
-                customerImage: "/reviews/000000.png", // Correct path for images in public/reviews folder
+                customerImage: "/reviews/r4.jpg", // Correct path for images in public/reviews folder
                 rating: 5, 
                 comment: "Authentic quality and traditional recipes. Love that they're chemical-free and safe for my entire family. Highly recommended!" 
               },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Edit2, Trash2, Save, X, Image as ImageIcon } from 'lucide-react'
+import { Plus, Edit2, Trash2, Save, X, Image as ImageIcon, ArrowUp, ArrowDown } from 'lucide-react'
 import { productsData } from '../../data/products'
 import ImageManager from './ImageManager'
 import { saveProductsToSupabase, loadProductsFromSupabase } from '../../services/supabase-cms'
@@ -49,6 +49,7 @@ function ProductsManager() {
       name: '',
       category: 'skin-care',
       type: 'regular', // regular or bundle
+      priority: 0, // Default priority
       description: '',
       fullDescription: '',
       benefits: '',
@@ -130,6 +131,17 @@ function ProductsManager() {
     setEditingProduct({ ...editingProduct, sizes: newSizes })
   }
 
+  const changePriority = (productId, delta) => {
+    const updatedProducts = products.map(p => {
+      if (p.id === productId) {
+        const newPriority = (p.priority || 0) + delta
+        return { ...p, priority: Math.max(0, newPriority) } // Prevent negative priority
+      }
+      return p
+    })
+    saveProducts(updatedProducts)
+  }
+
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Header */}
@@ -200,6 +212,20 @@ function ProductsManager() {
                   <option value="regular">Regular Product</option>
                   <option value="bundle">Bundle/Hamper</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Priority (Higher = Appears First)
+                </label>
+                <input
+                  type="number"
+                  value={editingProduct.priority ?? 0}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, priority: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  placeholder="0 = normal, 100 = top"
+                />
+                <p className="text-xs text-gray-500 mt-1">Use 100 for featured products like Diwali Hamper</p>
               </div>
             </div>
 
@@ -505,6 +531,7 @@ function ProductsManager() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sizes</th>
@@ -513,8 +540,31 @@ function ProductsManager() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products.map((product) => (
+              {products.sort((a, b) => (b.priority || 0) - (a.priority || 0)).map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-1">
+                      <div className="flex flex-col gap-1">
+                        <button
+                          onClick={() => changePriority(product.id, 10)}
+                          className="text-emerald-600 hover:text-emerald-900 p-1 hover:bg-emerald-50 rounded"
+                          title="Increase priority"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button
+                          onClick={() => changePriority(product.id, -10)}
+                          className="text-emerald-600 hover:text-emerald-900 p-1 hover:bg-emerald-50 rounded"
+                          title="Decrease priority"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                      </div>
+                      <span className={`text-sm font-bold ${product.priority > 0 ? 'text-emerald-600' : 'text-gray-400'}`}>
+                        {product.priority || 0}
+                      </span>
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">

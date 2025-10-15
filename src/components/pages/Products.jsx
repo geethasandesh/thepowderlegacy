@@ -19,7 +19,7 @@ function Products() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedProductSizes, setSelectedProductSizes] = useState({})
   const [sortBy, setSortBy] = useState('name')
-  const [viewMode, setViewMode] = useState('grid')
+  const [viewMode, setViewMode] = useState('list')
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [favorites, setFavorites] = useState(() => {
@@ -72,7 +72,13 @@ function Products() {
       )
     }
 
+    // Sort with priority first, then by user selection
     filtered.sort((a, b) => {
+      // Priority sorting (higher priority comes first)
+      const priorityDiff = (b.priority || 0) - (a.priority || 0)
+      if (priorityDiff !== 0) return priorityDiff
+
+      // Then apply user-selected sorting
       switch (sortBy) {
         case 'price-low':
           return (a.sizes?.[0]?.price || 0) - (b.sizes?.[0]?.price || 0)
@@ -300,8 +306,8 @@ function Products() {
         ) : (
           <div className={
             viewMode === 'grid'
-              ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'
-              : 'space-y-4'
+              ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 lg:gap-6'
+              : 'space-y-3 sm:space-y-4'
           }>
           {filteredProducts.map((product) => {
               const selectedSize = selectedProductSizes[product.id] || product.sizes?.[0]?.size
@@ -310,80 +316,84 @@ function Products() {
               if (viewMode === 'list') {
                 // List View
                 return (
-                  <div key={product.id} className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-stone-100 overflow-hidden">
+                  <div key={product.id} className="bg-white rounded-md sm:rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-stone-100 overflow-hidden">
                     <div className="flex flex-col sm:flex-row">
-                      <Link to={`/shop/product/${product.id}`} className="sm:w-48 h-48 sm:h-auto flex-shrink-0 relative bg-gradient-to-br from-stone-50 to-stone-100">
+                      <Link to={`/shop/product/${product.id}`} className="sm:w-32 lg:w-40 h-24 sm:h-32 lg:h-40 flex-shrink-0 relative bg-gradient-to-br from-stone-50 to-stone-100">
                         {product.images?.[0] ? (
                           <img
                             src={product.images[0]}
                             alt={product.name}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-stone-400">
-                            <Leaf size={48} />
+                            <Leaf size={20} className="sm:w-8 sm:h-8" />
                           </div>
                         )}
                       </Link>
 
-                      <div className="flex-1 p-6 flex flex-col justify-between">
+                      <div className="flex-1 p-2 sm:p-3 lg:p-4 flex flex-col justify-between">
                         <div>
                           <Link to={`/shop/product/${product.id}`}>
-                            <h3 className="text-xl font-bold text-stone-900 mb-2 hover:text-[#2d5f3f] transition-colors">
+                            <h3 className="text-[11px] sm:text-sm lg:text-base font-medium text-stone-900 mb-0.5 sm:mb-1 hover:text-[#2d5f3f] transition-colors line-clamp-2">
                               {product.name}
                             </h3>
                           </Link>
-                          <p className="text-stone-600 mb-4 line-clamp-2">{product.description}</p>
-                          <div className="flex items-center gap-2 mb-4">
+                          <p className="text-[9px] sm:text-xs text-stone-600 mb-1 sm:mb-2 line-clamp-2">{product.description}</p>
+                          <div className="flex items-center gap-0.5 sm:gap-1 mb-1 sm:mb-2">
                             <div className="flex items-center">
                               {[...Array(5)].map((_, i) => (
-                                <Star key={i} size={16} className={i < Math.floor(product.rating || 0) ? 'text-amber-400 fill-current' : 'text-stone-300'} />
+                                <Star key={i} size={8} className={`sm:w-3 sm:h-3 ${i < Math.floor(product.rating || 0) ? 'text-amber-400 fill-current' : 'text-stone-300'}`} />
                               ))}
                             </div>
-                            <span className="text-sm text-stone-500">({product.reviews || 0} reviews)</span>
+                            <span className="text-[8px] sm:text-[9px] text-stone-500">({product.reviews || 0})</span>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="text-3xl font-bold text-[#2d5f3f]">₹{sizeObj?.price || 0}</div>
-                            <select
-                              value={selectedSize}
-                              onChange={(e) => handleSizeSelect(product.id, e.target.value)}
-                              className="px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d5f3f]"
-                            >
-                              {product.sizes?.map(size => (
-                                <option key={size.size} value={size.size}>{size.size}</option>
-                              ))}
-                            </select>
-                          </div>
+                          {product.type !== 'bundle' && (
+                            <div className="flex items-center gap-1 sm:gap-2">
+                              <div className="text-sm sm:text-base lg:text-lg font-bold text-[#2d5f3f]">₹{sizeObj?.price || 0}</div>
+                              <select
+                                value={selectedSize}
+                                onChange={(e) => handleSizeSelect(product.id, e.target.value)}
+                                className="text-[8px] sm:text-[9px] border border-stone-300 rounded px-1 py-0.5 sm:px-2 sm:py-1 focus:outline-none focus:ring-1 focus:ring-[#2d5f3f]"
+                              >
+                                {product.sizes?.map(size => (
+                                  <option key={size.size} value={size.size}>{size.size}</option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
 
-                          <div className="flex items-center gap-2">
+                          <div className={`flex items-center gap-0.5 sm:gap-1 ${product.type === 'bundle' ? 'w-full justify-end' : ''}`}>
                             <button
                               onClick={() => toggleFavorite(product.id)}
-                              className={`p-3 rounded-lg transition-all hover:scale-110 ${
+                              className={`p-1.5 sm:p-2 rounded-md transition-all hover:scale-110 ${
                                 favorites.includes(product.id)
                                   ? 'bg-red-50 text-red-500'
                                   : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                               }`}
                             >
-                              <Heart size={20} className={favorites.includes(product.id) ? 'fill-current' : ''} />
+                              <Heart size={12} className={`sm:w-4 sm:h-4 ${favorites.includes(product.id) ? 'fill-current' : ''}`} />
                             </button>
                             {product.type === 'bundle' ? (
                               <Link
                                 to={`shop/product/${product.id}`}
-                                className="btn-primary px-6 py-3 flex items-center gap-2"
+                                className="bg-[#2d5f3f] text-white px-2 py-1.5 sm:px-3 sm:py-2 text-[9px] sm:text-[10px] font-medium rounded flex items-center gap-0.5 hover:bg-[#1e4a2f] transition-colors"
                               >
-                                <span className="text-lg">🎁</span>
-                                Customize Hamper
+                                <span className="text-xs">🎁</span>
+                                <span className="hidden sm:inline">Customize</span>
+                                <span className="sm:hidden">Customize</span>
                               </Link>
                             ) : (
                               <button
                                 onClick={() => handleAddToCart(product)}
-                                className="btn-primary px-6 py-3 flex items-center gap-2"
+                                className="bg-[#2d5f3f] text-white px-2 py-1.5 sm:px-3 sm:py-2 text-[9px] sm:text-[10px] font-medium rounded flex items-center gap-0.5 hover:bg-[#1e4a2f] transition-colors"
                               >
-                                <ShoppingCart size={18} />
-                                Add to Cart
+                                <ShoppingCart size={10} className="sm:w-3 sm:h-3" />
+                                <span className="hidden sm:inline">Add to Cart</span>
+                                <span className="sm:hidden">Add</span>
                               </button>
                             )}
                           </div>
@@ -396,7 +406,7 @@ function Products() {
 
               // Grid View
               return (
-                <div key={product.id} className="group bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-stone-100">
+                <div key={product.id} className="group bg-white rounded-md sm:rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-stone-100">
                   <Link to={`/shop/product/${product.id}`} className="block relative">
                     <div className="aspect-square bg-gradient-to-br from-stone-50 to-stone-100 overflow-hidden">
                       {product.images?.[0] ? (
@@ -404,11 +414,11 @@ function Products() {
                           src={product.images[0]}
                           alt={product.name}
                           loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-stone-400">
-                          <Leaf size={32} className="sm:w-12 sm:h-12" />
+                          <Leaf size={20} className="sm:w-6 sm:h-6" />
                         </div>
                       )}
                     </div>
@@ -417,60 +427,60 @@ function Products() {
                         e.preventDefault()
                         toggleFavorite(product.id)
                       }}
-                      className={`absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 ${
+                      className={`absolute top-1 right-1 sm:top-2 sm:right-2 w-5 h-5 sm:w-6 sm:h-6 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full shadow-sm flex items-center justify-center transition-all hover:scale-110 ${
                         favorites.includes(product.id) ? 'text-red-500' : 'text-stone-600'
                       }`}
                     >
-                      <Heart size={16} className={`sm:w-[18px] sm:h-[18px] ${favorites.includes(product.id) ? 'fill-current' : ''}`} />
+                      <Heart size={10} className={`sm:w-3 sm:h-3 ${favorites.includes(product.id) ? 'fill-current' : ''}`} />
                     </button>
                   </Link>
 
-                  <div className="p-3 sm:p-4 lg:p-5">
+                  <div className="p-1.5 sm:p-2 lg:p-3">
                     <Link to={`/shop/product/${product.id}`}>
-                      <h3 className="font-bold text-sm sm:text-base lg:text-lg text-stone-900 mb-1 sm:mb-2 group-hover:text-[#2d5f3f] transition-colors line-clamp-1">
+                      <h3 className="font-medium text-[10px] sm:text-xs lg:text-sm text-stone-900 mb-0.5 group-hover:text-[#2d5f3f] transition-colors line-clamp-2 leading-tight">
                         {product.name}
                       </h3>
                     </Link>
 
-                    <p className="text-xs sm:text-sm text-stone-600 mb-2 sm:mb-3 line-clamp-2 hidden sm:block">{product.description}</p>
-
-                    <div className="flex items-center gap-1 sm:gap-2 mb-3 sm:mb-4">
+                    <div className="flex items-center gap-0.5 mb-1 sm:mb-1.5">
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={12} className={`sm:w-3.5 sm:h-3.5 ${i < Math.floor(product.rating || 0) ? 'text-amber-400 fill-current' : 'text-stone-300'}`} />
+                          <Star key={i} size={6} className={`sm:w-2.5 sm:h-2.5 ${i < Math.floor(product.rating || 0) ? 'text-amber-400 fill-current' : 'text-stone-300'}`} />
                         ))}
                       </div>
-                      <span className="text-[10px] sm:text-xs text-stone-500">({product.reviews || 0})</span>
+                      <span className="text-[8px] sm:text-[9px] text-stone-500">({product.reviews || 0})</span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
-                      <div className="text-lg sm:text-xl lg:text-2xl font-bold text-[#2d5f3f]">₹{sizeObj?.price || 0}</div>
-                      <select
-                        value={selectedSize}
-                        onChange={(e) => handleSizeSelect(product.id, e.target.value)}
-                        className="text-xs sm:text-sm border border-stone-300 rounded-lg px-1.5 py-1 sm:px-2 sm:py-1.5 focus:outline-none focus:ring-2 focus:ring-[#2d5f3f] w-full sm:w-auto"
-                      >
-                        {product.sizes?.map(size => (
-                          <option key={size.size} value={size.size}>{size.size}</option>
-                        ))}
-                      </select>
-                    </div>
+                    {product.type !== 'bundle' && (
+                      <div className="flex items-center justify-between gap-0.5 mb-1 sm:mb-1.5">
+                        <div className="text-[11px] sm:text-xs lg:text-sm font-bold text-[#2d5f3f]">₹{sizeObj?.price || 0}</div>
+                        <select
+                          value={selectedSize}
+                          onChange={(e) => handleSizeSelect(product.id, e.target.value)}
+                          className="text-[8px] sm:text-[9px] border border-stone-300 rounded px-1 py-0.5 sm:px-1.5 sm:py-1 focus:outline-none focus:ring-1 focus:ring-[#2d5f3f] min-w-[50px]"
+                        >
+                          {product.sizes?.map(size => (
+                            <option key={size.size} value={size.size}>{size.size}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
                     {product.type === 'bundle' ? (
                       <Link
                         to={`shop/product/${product.id}`}
-                        className="w-full btn-primary py-2 sm:py-2.5 text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2"
+                        className="w-full bg-[#2d5f3f] text-white py-1 sm:py-1.5 text-[9px] sm:text-[10px] font-medium rounded flex items-center justify-center gap-0.5 hover:bg-[#1e4a2f] transition-colors"
                       >
-                        <span className="text-lg">🎁</span>
-                        <span className="hidden sm:inline">Customize Hamper</span>
+                        <span className="text-xs">🎁</span>
+                        <span className="hidden sm:inline">Customize</span>
                         <span className="sm:hidden">Customize</span>
                       </Link>
                     ) : (
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className="w-full btn-primary py-2 sm:py-2.5 text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2"
+                        className="w-full bg-[#2d5f3f] text-white py-1 sm:py-1.5 text-[9px] sm:text-[10px] font-medium rounded flex items-center justify-center gap-0.5 hover:bg-[#1e4a2f] transition-colors"
                       >
-                        <ShoppingCart size={14} className="sm:w-4 sm:h-4" />
+                        <ShoppingCart size={8} className="sm:w-2.5 sm:h-2.5" />
                         <span className="hidden sm:inline">Add to Cart</span>
                         <span className="sm:hidden">Add</span>
                       </button>
