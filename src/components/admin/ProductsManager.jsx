@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Edit2, Trash2, Save, X, Image as ImageIcon, ArrowUp, GripVertical } from 'lucide-react'
+import { Plus, Edit2, Trash2, Save, X, Image as ImageIcon } from 'lucide-react'
 import { productsData } from '../../data/products'
 import ImageManager from './ImageManager'
 import { saveProductsToSupabase, loadProductsFromSupabase } from '../../services/supabase-cms'
-import { clearProductsCache } from '../../services/products'
 
 function ProductsManager() {
   const [products, setProducts] = useState([])
@@ -38,8 +37,6 @@ function ProductsManager() {
     
     if (result.success) {
       console.log('✅ Products saved to database')
-      // Clear front-end cache to ensure fresh data
-      clearProductsCache()
     } else {
       console.error('❌ Failed to save products:', result.error)
       alert('Warning: Failed to save to database. Changes are cached locally.')
@@ -86,22 +83,6 @@ function ProductsManager() {
       const updatedProducts = products.filter(p => p.id !== productId)
       saveProducts(updatedProducts)
     }
-  }
-
-  const moveToTop = (productId) => {
-    const product = products.find(p => p.id === productId)
-    if (product) {
-      const otherProducts = products.filter(p => p.id !== productId)
-      const updatedProducts = [product, ...otherProducts]
-      saveProducts(updatedProducts)
-    }
-  }
-
-  const moveProduct = (fromIndex, toIndex) => {
-    const updatedProducts = [...products]
-    const [movedProduct] = updatedProducts.splice(fromIndex, 1)
-    updatedProducts.splice(toIndex, 0, movedProduct)
-    saveProducts(updatedProducts)
   }
 
   const handleSave = () => {
@@ -524,51 +505,16 @@ function ProductsManager() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sizes</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products.map((product, index) => (
+              {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
-                  {/* Order Column */}
-                  <td className="px-3 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm font-medium text-gray-500 w-6 text-center">
-                        {index + 1}
-                      </span>
-                      <div className="flex flex-col gap-1">
-                        <button
-                          onClick={() => index > 0 && moveProduct(index, index - 1)}
-                          disabled={index === 0}
-                          className={`p-1 rounded ${
-                            index === 0 
-                              ? 'text-gray-300 cursor-not-allowed' 
-                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                          }`}
-                          title="Move up"
-                        >
-                          <ArrowUp size={12} />
-                        </button>
-                        {product.type === 'bundle' && (
-                          <button
-                            onClick={() => moveToTop(product.id)}
-                            className="p-1 rounded text-orange-600 hover:text-orange-900 hover:bg-orange-100"
-                            title="Move Diwali Hamper to Top"
-                          >
-                            🎁
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  
-                  {/* Product Column */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">
@@ -585,61 +531,33 @@ function ProductsManager() {
                         )}
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                          {product.name}
-                          {product.type === 'bundle' && (
-                            <span className="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full">
-                              🎁 Bundle
-                            </span>
-                          )}
-                        </div>
+                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
                         <div className="text-sm text-gray-500 truncate max-w-xs">{product.description}</div>
                       </div>
                     </div>
                   </td>
-                  
-                  {/* Category Column */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
                       {product.category}
                     </span>
                   </td>
-                  
-                  {/* Type Column */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      product.type === 'bundle' 
-                        ? 'bg-orange-100 text-orange-800' 
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {product.type === 'bundle' ? '🎁 Bundle' : '📦 Regular'}
-                    </span>
-                  </td>
-                  
-                  {/* Sizes Column */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {product.sizes?.length || 0} sizes
                   </td>
-                  
-                  {/* Rating Column */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     ⭐ {product.rating} ({product.reviews})
                   </td>
-                  
-                  {/* Actions Column */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center gap-2">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(product)}
-                        className="text-emerald-600 hover:text-emerald-900 p-1 rounded hover:bg-emerald-50"
-                        title="Edit product"
+                        className="text-emerald-600 hover:text-emerald-900"
                       >
                         <Edit2 size={18} />
                       </button>
                       <button
                         onClick={() => handleDelete(product.id)}
-                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                        title="Delete product"
+                        className="text-red-600 hover:text-red-900"
                       >
                         <Trash2 size={18} />
                       </button>

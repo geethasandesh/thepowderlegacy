@@ -18,7 +18,7 @@ function Products() {
   const [filteredProducts, setFilteredProducts] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedProductSizes, setSelectedProductSizes] = useState({})
-  const [sortBy, setSortBy] = useState('admin-order')
+  const [sortBy, setSortBy] = useState('name')
   const [viewMode, setViewMode] = useState('grid')
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
@@ -40,8 +40,7 @@ function Products() {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      // Force refresh to get latest product order from admin
-      const list = await fetchProducts({ forceRefresh: true })
+      const list = await fetchProducts({})
       if (!cancelled) {
         setProducts(list)
         setFilteredProducts(list)
@@ -73,26 +72,20 @@ function Products() {
       )
     }
 
-    // Only sort if not using admin-set order
-    if (sortBy !== 'admin-order') {
-      filtered.sort((a, b) => {
-        switch (sortBy) {
-          case 'price-low':
-            return (a.sizes?.[0]?.price || 0) - (b.sizes?.[0]?.price || 0)
-          case 'price-high':
-            return (b.sizes?.[0]?.price || 0) - (a.sizes?.[0]?.price || 0)
-          case 'rating':
-            return (b.rating || 0) - (a.rating || 0)
-          case 'reviews':
-            return (b.reviews || 0) - (a.reviews || 0)
-          case 'name':
-            return (a.name || '').localeCompare(b.name || '')
-          default:
-            // Keep admin-set order
-            return 0
-        }
-      })
-    }
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'price-low':
+          return (a.sizes?.[0]?.price || 0) - (b.sizes?.[0]?.price || 0)
+        case 'price-high':
+          return (b.sizes?.[0]?.price || 0) - (a.sizes?.[0]?.price || 0)
+        case 'rating':
+          return (b.rating || 0) - (a.rating || 0)
+        case 'reviews':
+          return (b.reviews || 0) - (a.reviews || 0)
+        default:
+          return (a.name || '').localeCompare(b.name || '')
+      }
+    })
 
     setFilteredProducts(filtered)
   }, [selectedCategory, sortBy, searchQuery, products])
@@ -220,18 +213,17 @@ function Products() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-stone-600">
                 <span className="font-medium text-sm lg:text-base">Sort by:</span>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="px-3 py-2 text-sm lg:text-base border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d5f3f]"
-                  >
-                    <option value="admin-order">🎁 Featured Order</option>
-                    <option value="name">Name (A-Z)</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="rating">Highest Rated</option>
-                    <option value="reviews">Most Reviews</option>
-                  </select>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-3 py-2 text-sm lg:text-base border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d5f3f]"
+                >
+                  <option value="name">Name (A-Z)</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="rating">Highest Rated</option>
+                  <option value="reviews">Most Reviews</option>
+                </select>
               </div>
             </div>
 
@@ -275,7 +267,6 @@ function Products() {
                     onChange={(e) => setSortBy(e.target.value)}
                     className="w-full px-3 py-2 text-sm border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d5f3f]"
                   >
-                    <option value="admin-order">🎁 Featured Order</option>
                     <option value="name">Name (A-Z)</option>
                     <option value="price-low">Price: Low to High</option>
                     <option value="price-high">Price: High to Low</option>
@@ -309,8 +300,8 @@ function Products() {
         ) : (
           <div className={
             viewMode === 'grid'
-              ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4'
-              : 'space-y-3'
+              ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'
+              : 'space-y-4'
           }>
           {filteredProducts.map((product) => {
               const selectedSize = selectedProductSizes[product.id] || product.sizes?.[0]?.size
@@ -354,20 +345,18 @@ function Products() {
                         </div>
 
                         <div className="flex items-center justify-between">
-                          {product.type !== 'bundle' && (
-                            <div className="flex items-center gap-4">
-                              <div className="text-3xl font-bold text-[#2d5f3f]">₹{sizeObj?.price || 0}</div>
-                              <select
-                                value={selectedSize}
-                                onChange={(e) => handleSizeSelect(product.id, e.target.value)}
-                                className="px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d5f3f]"
-                              >
-                                {product.sizes?.map(size => (
-                                  <option key={size.size} value={size.size}>{size.size}</option>
-                                ))}
-                              </select>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-4">
+                            <div className="text-3xl font-bold text-[#2d5f3f]">₹{sizeObj?.price || 0}</div>
+                            <select
+                              value={selectedSize}
+                              onChange={(e) => handleSizeSelect(product.id, e.target.value)}
+                              className="px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d5f3f]"
+                            >
+                              {product.sizes?.map(size => (
+                                <option key={size.size} value={size.size}>{size.size}</option>
+                              ))}
+                            </select>
+                          </div>
 
                           <div className="flex items-center gap-2">
                             <button
@@ -382,7 +371,7 @@ function Products() {
                             </button>
                             {product.type === 'bundle' ? (
                               <Link
-                                to={`/bundle/${product.id}`}
+                                to={`shop/product/${product.id}`}
                                 className="btn-primary px-6 py-3 flex items-center gap-2"
                               >
                                 <span className="text-lg">🎁</span>
@@ -405,21 +394,21 @@ function Products() {
                 )
               }
 
-              // Grid View - Mobile Optimized (Zepto/Blinkit Style)
+              // Grid View
               return (
-                <div key={product.id} className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 flex flex-col">
-                  <Link to={product.type === 'bundle' ? `/bundle/${product.id}` : `/shop/product/${product.id}`} className="block relative">
-                    <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                <div key={product.id} className="group bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-stone-100">
+                  <Link to={`/shop/product/${product.id}`} className="block relative">
+                    <div className="aspect-square bg-gradient-to-br from-stone-50 to-stone-100 overflow-hidden">
                       {product.images?.[0] ? (
                         <img
                           src={product.images[0]}
                           alt={product.name}
                           loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-200"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <Leaf size={20} />
+                        <div className="w-full h-full flex items-center justify-center text-stone-400">
+                          <Leaf size={32} className="sm:w-12 sm:h-12" />
                         </div>
                       )}
                     </div>
@@ -428,60 +417,62 @@ function Products() {
                         e.preventDefault()
                         toggleFavorite(product.id)
                       }}
-                      className={`absolute top-1 right-1 w-5 h-5 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full shadow-sm flex items-center justify-center transition-all ${
-                        favorites.includes(product.id) ? 'text-red-500' : 'text-gray-500'
+                      className={`absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 ${
+                        favorites.includes(product.id) ? 'text-red-500' : 'text-stone-600'
                       }`}
                     >
-                      <Heart size={10} className={favorites.includes(product.id) ? 'fill-current' : ''} />
+                      <Heart size={16} className={`sm:w-[18px] sm:h-[18px] ${favorites.includes(product.id) ? 'fill-current' : ''}`} />
                     </button>
                   </Link>
 
-                  <div className="p-2 flex flex-col flex-1">
-                    <Link to={product.type === 'bundle' ? `/bundle/${product.id}` : `/shop/product/${product.id}`} className="flex-1">
-                      <h3 className="font-medium text-[3px] text-gray-900 mb-1 group-hover:text-[#2d5f3f] transition-colors line-clamp-1 leading-tight overflow-hidden text-ellipsis whitespace-nowrap">
+                  <div className="p-3 sm:p-4 lg:p-5">
+                    <Link to={`/shop/product/${product.id}`}>
+                      <h3 className="font-bold text-sm sm:text-base lg:text-lg text-stone-900 mb-1 sm:mb-2 group-hover:text-[#2d5f3f] transition-colors line-clamp-1">
                         {product.name}
                       </h3>
                     </Link>
 
-                    <div className="flex items-center gap-1 mb-1.5">
+                    <p className="text-xs sm:text-sm text-stone-600 mb-2 sm:mb-3 line-clamp-2 hidden sm:block">{product.description}</p>
+
+                    <div className="flex items-center gap-1 sm:gap-2 mb-3 sm:mb-4">
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={8} className={`${i < Math.floor(product.rating || 0) ? 'text-amber-400 fill-current' : 'text-gray-300'}`} />
+                          <Star key={i} size={12} className={`sm:w-3.5 sm:h-3.5 ${i < Math.floor(product.rating || 0) ? 'text-amber-400 fill-current' : 'text-stone-300'}`} />
                         ))}
                       </div>
-                      <span className="text-[8px] text-gray-500">({product.reviews || 0})</span>
+                      <span className="text-[10px] sm:text-xs text-stone-500">({product.reviews || 0})</span>
                     </div>
 
-                    {product.type !== 'bundle' && (
-                      <div className="flex items-center justify-between gap-1 mb-2">
-                        <div className="text-[11px] font-bold text-[#2d5f3f]">₹{sizeObj?.price || 0}</div>
-                        <select
-                          value={selectedSize}
-                          onChange={(e) => handleSizeSelect(product.id, e.target.value)}
-                          className="text-[8px] border border-gray-200 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#2d5f3f] bg-white min-w-0"
-                        >
-                          {product.sizes?.map(size => (
-                            <option key={size.size} value={size.size}>{size.size}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
+                      <div className="text-lg sm:text-xl lg:text-2xl font-bold text-[#2d5f3f]">₹{sizeObj?.price || 0}</div>
+                      <select
+                        value={selectedSize}
+                        onChange={(e) => handleSizeSelect(product.id, e.target.value)}
+                        className="text-xs sm:text-sm border border-stone-300 rounded-lg px-1.5 py-1 sm:px-2 sm:py-1.5 focus:outline-none focus:ring-2 focus:ring-[#2d5f3f] w-full sm:w-auto"
+                      >
+                        {product.sizes?.map(size => (
+                          <option key={size.size} value={size.size}>{size.size}</option>
+                        ))}
+                      </select>
+                    </div>
 
                     {product.type === 'bundle' ? (
                       <Link
-                        to={`/bundle/${product.id}`}
-                        className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white py-1.5 px-2 rounded-md font-medium text-[10px] flex items-center justify-center gap-1 transition-all shadow-sm"
+                        to={`shop/product/${product.id}`}
+                        className="w-full btn-primary py-2 sm:py-2.5 text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2"
                       >
-                        <span className="text-[10px]">🎁</span>
-                        <span>Customize</span>
+                        <span className="text-lg">🎁</span>
+                        <span className="hidden sm:inline">Customize Hamper</span>
+                        <span className="sm:hidden">Customize</span>
                       </Link>
                     ) : (
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className="w-full bg-[#2d5f3f] hover:bg-[#1e4029] text-white py-1.5 px-2 rounded-md font-medium text-[10px] flex items-center justify-center gap-1 transition-all shadow-sm"
+                        className="w-full btn-primary py-2 sm:py-2.5 text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2"
                       >
-                        <ShoppingCart size={10} />
-                        <span>Add</span>
+                        <ShoppingCart size={14} className="sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Add to Cart</span>
+                        <span className="sm:hidden">Add</span>
                       </button>
                     )}
                   </div>
