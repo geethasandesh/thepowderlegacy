@@ -299,16 +299,16 @@ function Home() {
           <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {[
               { 
-                name: "Priya Sharma", 
-                location: "Mumbai, Maharashtra",
-                avatar: "PS",
+                name: "Priya ", 
+                location: "Hyderabad, Telangana",
+                avatar: "P",
                 customerImage: "/reviews/r1.jpg", // Correct path for images in public/reviews folder
                 rating: 5, 
                 comment: "The Sassy Sunnipindi transformed my skin! Completely natural and so effective. I've recommended it to all my friends." 
               },
               { 
                 name: "Rajesh Kumar", 
-                location: "Delhi NCR",
+                location: "Tirupati, Andhra Pradesh",
                 avatar: "RK",
                 customerImage: "/reviews/r2.jpg", // Correct path for images in public/reviews folder
                 rating: 5, 
@@ -327,7 +327,7 @@ function Home() {
               
               { 
                 name: "Ramya", 
-                location: "Hyderabad",
+                location: "Hyderabad,Telangana",
                 avatar: "R",
                 customerImage: "/reviews/r3.jpg", // Correct path for images in public/reviews folder
                 rating: 5, 
