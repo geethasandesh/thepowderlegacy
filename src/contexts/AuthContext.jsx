@@ -58,6 +58,15 @@ export function AuthProvider({ children }) {
     })
 
     if (error) throw error
+    
+    // Try to link any guest orders to this new user account
+    try {
+      const { linkGuestOrdersToUser } = await import('../services/supabase-db')
+      await linkGuestOrdersToUser(data.user.id, email)
+    } catch (err) {
+      console.warn('Could not link guest orders:', err)
+    }
+    
     return data.user
   }
 
@@ -68,6 +77,15 @@ export function AuthProvider({ children }) {
     })
 
     if (error) throw error
+    
+    // Try to link any guest orders to this user account
+    try {
+      const { linkGuestOrdersToUser } = await import('../services/supabase-db')
+      await linkGuestOrdersToUser(data.user.id, email)
+    } catch (err) {
+      console.warn('Could not link guest orders:', err)
+    }
+    
     return data.user
   }
 

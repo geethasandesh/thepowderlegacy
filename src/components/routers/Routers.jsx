@@ -8,14 +8,18 @@ import About from '../pages/About'
 import CheckoutAddress from '../pages/CheckoutAddress'
 import CheckoutDelivery from '../pages/CheckoutDelivery'
 import CheckoutPayment from '../pages/CheckoutPayment'
+import CheckoutLoginPrompt from '../pages/CheckoutLoginPrompt'
 import OrderSuccess from '../pages/OrderSuccess'
 import Login from '../pages/Login'
 import Signup from '../pages/Signup'
+import ForgotPassword from '../pages/ForgotPassword'
+import ResetPassword from '../pages/ResetPassword'
 import Privacy from '../footer/Privacy'
 import Favorites from '../pages/Favorites'
+import Orders from '../pages/Orders'
 import Terms from '../footer/Terms'
 import Shipping from '../footer/Shipping'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import Account from '../pages/Account'
 import Admin from '../pages/Admin'
 import PaymentCallback from '../pages/PaymentCallback'
@@ -26,6 +30,12 @@ import ProtectedAdminRoute from '../admin/ProtectedAdminRoute'
 import BundlePage from '../pages/BundlePage'
 
 function Routers() {
+  const navigate = useNavigate()
+
+  const handleContinueAsGuest = () => {
+    navigate('/checkout/address')
+  }
+
   return (
     <div>
         <ScrollToTop />
@@ -45,6 +55,7 @@ function Routers() {
             <Route path='/bundle/:id' element={<BundlePage />} />
             <Route path='/contact' element={<Contact />} />
             <Route path='/cart' element={<Cart />} />
+            <Route path='/checkout' element={<CheckoutLoginPrompt onContinueAsGuest={handleContinueAsGuest} />} />
             <Route path='/checkout/address' element={<CheckoutAddress />} />
             <Route path='/checkout/delivery' element={<CheckoutDelivery />} />
             <Route path='/checkout/payment' element={<CheckoutPayment />} />
@@ -52,10 +63,13 @@ function Routers() {
             <Route path='/order-success' element={<OrderSuccess />} />
             <Route path='/login' element={<Login />} />
             <Route path='/signup' element={<Signup />} />
+            <Route path='/forgot-password' element={<ForgotPassword />} />
+            <Route path='/reset-password' element={<ResetPassword />} />
             <Route path='/privacy' element={<Privacy />} />
             <Route path='/terms' element={<Terms />} />
             <Route path='/shipping' element={<Shipping />} />
             <Route path='/account' element={<Account />} />
+            <Route path='/orders' element={<Orders />} />
             <Route path='/favorites' element={<Favorites />} />
             {/* Admin routes */}
             <Route path='/admin' element={<AdminLogin />} />

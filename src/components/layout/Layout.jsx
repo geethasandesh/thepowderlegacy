@@ -6,6 +6,8 @@ import CartNotification from '../CartNotification'
 import { CartProvider } from '../../contexts/CartContext'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { AdminProvider } from '../../contexts/AdminContext'
+import { UserProvider } from '../../contexts/UserContext'
+import { FavoritesProvider } from '../../contexts/FavoritesContext'
 
 function Layout({ children }) {
     const location = useLocation()
@@ -16,9 +18,13 @@ function Layout({ children }) {
         return (
             <AdminProvider>
                 <AuthProvider>
-                    <CartProvider>
-                        {children}
-                    </CartProvider>
+                    <UserProvider>
+                        <CartProvider>
+                            <FavoritesProvider>
+                                {children}
+                            </FavoritesProvider>
+                        </CartProvider>
+                    </UserProvider>
                 </AuthProvider>
             </AdminProvider>
         )
@@ -27,14 +33,18 @@ function Layout({ children }) {
     return (
         <AdminProvider>
             <AuthProvider>
-                <CartProvider>
-                    <Header />
-                    <main className="min-h-screen bg-gradient-to-b from-white via-stone-50 to-white">
-                        {children}
-                    </main>
-                    <Footer />
-                    <CartNotification />
-                </CartProvider>
+                <UserProvider>
+                    <CartProvider>
+                        <FavoritesProvider>
+                            <Header />
+                            <main className="min-h-screen bg-gradient-to-b from-white via-stone-50 to-white">
+                                {children}
+                            </main>
+                            <Footer />
+                            <CartNotification />
+                        </FavoritesProvider>
+                    </CartProvider>
+                </UserProvider>
             </AuthProvider>
         </AdminProvider>
     )

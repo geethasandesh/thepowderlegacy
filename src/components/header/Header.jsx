@@ -1,26 +1,42 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, User, ShoppingCart, Heart, ChevronDown, Leaf, Shield, Award } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Menu, X, User, ShoppingCart, Heart, ChevronDown, Leaf, Shield, Award, LogOut, Package } from 'lucide-react'
 import { useCart } from '../../contexts/CartContext'
+import { useAuth } from '../../contexts/AuthContext'
+import { useUser } from '../../contexts/UserContext'
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showShopDropdown, setShowShopDropdown] = useState(false)
+  const [showUserDropdown, setShowUserDropdown] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
   const { getCartItemsCount } = useCart()
+  const { currentUser, logout } = useAuth()
+  const { getDisplayName } = useUser()
   const [profileName, setProfileName] = useState('')
 
   useEffect(() => {
+    setProfileName(getDisplayName())
+  }, [getDisplayName, currentUser])
+
+  useEffect(() => {
     const load = () => {
-      try {
-        const p = JSON.parse(localStorage.getItem('profile') || '{}')
-        setProfileName(p?.name || '')
-      } catch { setProfileName('') }
+      setProfileName(getDisplayName())
     }
-    load()
     window.addEventListener('profileUpdated', load)
     return () => window.removeEventListener('profileUpdated', load)
-  }, [])
+  }, [getDisplayName])
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      setShowUserDropdown(false)
+      navigate('/')
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+  }
 
   const navigation = [
     { name: 'Home', href: '/home' },
@@ -140,20 +156,6 @@ function Header() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-1">
-              {/* Account */}
-              <Link 
-                to="/account" 
-                className="relative p-2.5 text-stone-700 hover:text-[#2d5f3f] hover:bg-[#f5f5f4] rounded-lg transition-all"
-                aria-label="Account"
-              >
-                <User size={20} />
-                {profileName && (
-                  <span className="absolute -bottom-0.5 -right-0.5 bg-[#2d5f3f] text-white text-[9px] leading-none rounded-full px-1.5 py-0.5 font-semibold">
-                    {profileName.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase()}
-                  </span>
-                )}
-              </Link>
-
               {/* Favorites */}
               <Link 
                 to="/favorites" 
@@ -173,6 +175,96 @@ function Header() {
                 {getCartItemsCount() > 0 && (
                   <span className="absolute -top-1 -right-1 bg-[#d4a574] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold shadow-md">
                     {getCartItemsCount()}
+                  </span>
+                )}
+              </Link>
+
+              {/* User Menu - Logged In */}
+              {currentUser ? (
+                <div 
+                  className="relative hidden lg:block"
+                  onMouseEnter={() => setShowUserDropdown(true)}
+                  onMouseLeave={() => setShowUserDropdown(false)}
+                >
+                  <button 
+                    className="flex items-center gap-2 p-2.5 text-stone-700 hover:text-[#2d5f3f] hover:bg-[#f5f5f4] rounded-lg transition-all"
+                    aria-label="Account"
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">
+                        {profileName ? profileName.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase() : <User size={16} />}
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* User Dropdown */}
+                  {showUserDropdown && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
+                        <p className="text-sm font-semibold text-slate-900 truncate">{profileName || 'User'}</p>
+                        <p className="text-xs text-slate-600 truncate">{currentUser.email}</p>
+                      </div>
+                      <div className="py-2">
+                        <Link 
+                          to="/account" 
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-stone-700 hover:bg-[#f5f5f4] hover:text-[#2d5f3f] transition-colors"
+                        >
+                          <User size={16} />
+                          <span className="font-medium">My Account</span>
+                        </Link>
+                        <Link 
+                          to="/orders" 
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-stone-700 hover:bg-[#f5f5f4] hover:text-[#2d5f3f] transition-colors"
+                        >
+                          <Package size={16} />
+                          <span className="font-medium">My Orders</span>
+                        </Link>
+                        <Link 
+                          to="/favorites" 
+                          className="flex items-center gap-3 px-4 py-3 text-sm text-stone-700 hover:bg-[#f5f5f4] hover:text-[#2d5f3f] transition-colors"
+                        >
+                          <Heart size={16} />
+                          <span className="font-medium">Favorites</span>
+                        </Link>
+                        <button 
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut size={16} />
+                          <span className="font-medium">Logout</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* User Menu - Not Logged In */
+                <div className="hidden lg:flex items-center gap-2 ml-2">
+                  <Link 
+                    to="/login" 
+                    className="px-4 py-2 text-sm font-semibold text-[#2d5f3f] hover:bg-[#f5f5f4] rounded-lg transition-all"
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    to="/signup" 
+                    className="px-4 py-2 text-sm font-semibold bg-[#2d5f3f] text-white hover:bg-[#234d32] rounded-lg transition-all"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+
+              {/* Mobile Account Button */}
+              <Link 
+                to="/account" 
+                className="lg:hidden relative p-2.5 text-stone-700 hover:text-[#2d5f3f] hover:bg-[#f5f5f4] rounded-lg transition-all"
+                aria-label="Account"
+              >
+                <User size={20} />
+                {profileName && (
+                  <span className="absolute -bottom-0.5 -right-0.5 bg-[#2d5f3f] text-white text-[9px] leading-none rounded-full px-1.5 py-0.5 font-semibold">
+                    {profileName.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase()}
                   </span>
                 )}
               </Link>

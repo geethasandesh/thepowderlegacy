@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Mail, Lock, User } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
 function Signup() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { signup } = useAuth()
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' })
   const [errors, setErrors] = useState({})
@@ -15,6 +16,7 @@ function Signup() {
     if (!formData.name) nextErrors.name = 'Name is required'
     if (!formData.email) nextErrors.email = 'Email is required'
     if (!formData.password) nextErrors.password = 'Password is required'
+    if (formData.password.length < 6) nextErrors.password = 'Password must be at least 6 characters'
     if (formData.password !== formData.confirmPassword) nextErrors.confirmPassword = 'Passwords do not match'
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
@@ -30,10 +32,31 @@ function Signup() {
     setIsSubmitting(true)
 
     try {
-      await signup(formData.email, formData.password, formData.name)
-      navigate('/')
+      const user = await signup(formData.email, formData.password, formData.name)
+      
+      // Check if email confirmation is required
+      if (user && !user.email_confirmed_at) {
+        // Email confirmation required - show message
+        alert('Account created! Please check your email to verify your account before logging in.')
+      }
+      
+      // Handle redirects after signup
+      const redirect = searchParams.get('redirect')
+      if (redirect === 'checkout') {
+        navigate('/checkout/address')
+      } else if (redirect) {
+        navigate(`/${redirect}`)
+      } else {
+        navigate('/')
+      }
     } catch (err) {
-      alert(err?.message || 'Signup failed')
+      let errorMessage = err?.message || 'Signup failed'
+      
+      if (errorMessage.includes('already registered')) {
+        errorMessage = 'This email is already registered. Please login instead.'
+      }
+      
+      setErrors({ email: errorMessage })
     } finally {
       setIsSubmitting(false)
     }

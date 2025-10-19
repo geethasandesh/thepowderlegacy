@@ -195,3 +195,70 @@ export async function loadFavorites(userId) {
   }
 }
 
+// ==================== GUEST ORDER LINKING ====================
+
+export async function linkGuestOrdersToUser(userId, guestEmail) {
+  if (!userId || !guestEmail) return { linked: 0, error: null }
+
+  try {
+    // Skip if Supabase not configured
+    if (!isSupabaseConfigured()) {
+      console.warn('⚠️ Supabase not configured - cannot link guest orders')
+      return { linked: 0, error: 'Supabase not configured' }
+    }
+
+    // Find all guest orders with the matching email
+    const { data: guestOrders, error: fetchError } = await supabase
+      .from('orders')
+      .select('id')
+      .is('user_id', null)
+      .contains('shipping_address', { email: guestEmail })
+
+    if (fetchError) throw fetchError
+
+    if (!guestOrders || guestOrders.length === 0) {
+      return { linked: 0, error: null }
+    }
+
+    // Update all guest orders to link them to the user
+    const orderIds = guestOrders.map(order => order.id)
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ user_id: userId })
+      .in('id', orderIds)
+
+    if (updateError) throw updateError
+
+    console.log(`✅ Linked ${guestOrders.length} guest orders to user ${userId}`)
+    return { linked: guestOrders.length, error: null }
+  } catch (error) {
+    console.error('❌ Error linking guest orders:', error)
+    return { linked: 0, error: error.message }
+  }
+}
+
+export async function getUserOrders(userId) {
+  if (!userId) return []
+
+  try {
+    // Skip if Supabase not configured
+    if (!isSupabaseConfigured()) {
+      console.warn('⚠️ Supabase not configured')
+      return []
+    }
+
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    return data || []
+  } catch (error) {
+    console.error('❌ Error loading user orders:', error)
+    return []
+  }
+}
+

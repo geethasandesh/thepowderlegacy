@@ -274,7 +274,7 @@ function Cart() {
 
               {/* Checkout Button */}
               <Link
-                to="/checkout/address"
+                to="/checkout"
                 className="btn-primary w-full text-center py-3 sm:py-4 text-base sm:text-lg flex items-center justify-center gap-2 mb-3"
               >
                 Proceed to Checkout

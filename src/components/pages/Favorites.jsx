@@ -1,54 +1,102 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Heart, X } from 'lucide-react'
 import { productsData } from '../../data/products'
+import { useFavorites } from '../../contexts/FavoritesContext'
 
 function Favorites() {
-  const [favoriteIds, setFavoriteIds] = useState([])
+  const { favoriteIds, removeFavorite, loading } = useFavorites()
   const [favorites, setFavorites] = useState([])
 
   useEffect(() => {
-    try {
-      const ids = JSON.parse(localStorage.getItem('favorites') || '[]')
-      setFavoriteIds(ids)
-      const items = productsData.filter(p => ids.includes(p.id))
-      setFavorites(items)
-    } catch {}
-  }, [])
+    const items = productsData.filter(p => favoriteIds.includes(p.id))
+    setFavorites(items)
+  }, [favoriteIds])
 
-  const removeFavorite = (id) => {
-    const next = favoriteIds.filter(fid => fid !== id)
-    localStorage.setItem('favorites', JSON.stringify(next))
-    setFavoriteIds(next)
-    setFavorites(productsData.filter(p => next.includes(p.id)))
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mx-auto"></div>
+            <p className="mt-3 text-sm text-gray-600">Loading favorites...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-emerald-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="text-3xl font-bold text-slate-900 mb-6">My Favorites</h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">My Favorites</h1>
+            <p className="text-sm text-gray-600 mt-1">
+              {favorites.length > 0 
+                ? `${favorites.length} item${favorites.length !== 1 ? 's' : ''}`
+                : 'No items saved'
+              }
+            </p>
+          </div>
+          {favorites.length > 0 && (
+            <Link 
+              to="/shop" 
+              className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+            >
+              Browse More
+            </Link>
+          )}
+        </div>
 
         {favorites.length === 0 ? (
-          <div className="bg-white rounded-xl p-8 text-center shadow-sm">
-            <p className="text-slate-600">No items in favorites yet.</p>
-            <Link to="/shop" className="mt-4 inline-block text-emerald-700 font-semibold">Browse products →</Link>
+          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+            <Heart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">No favorites yet</h2>
+            <p className="text-sm text-gray-600 mb-4">Save products you love!</p>
+            <Link 
+              to="/shop" 
+              className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+            >
+              Browse Products
+            </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {favorites.map(product => (
-              <div key={product.id} className="bg-white rounded-xl overflow-hidden border border-emerald-100 hover:shadow-lg transition-shadow">
-                <Link to={`/shop/product/${product.id}`} className="block aspect-square bg-emerald-50 overflow-hidden">
-                  {product.images?.[0] && (
-                    <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
-                  )}
-                </Link>
-                <div className="p-4">
-                  <Link to={`/shop/product/${product.id}`} className="font-semibold text-slate-900 hover:text-emerald-700">
-                    {product.name}
-                  </Link>
-                  <div className="mt-3 flex items-center gap-3">
-                    <Link to={`/shop/product/${product.id}`} className="flex-1 text-center border-2 border-gray-300 rounded-full py-2 hover:border-emerald-600 hover:text-emerald-700 font-semibold">View</Link>
-                    <button onClick={() => removeFavorite(product.id)} className="px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold">Remove</button>
+              <div key={product.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-all group">
+                <Link to={`/shop/product/${product.id}`} className="block relative">
+                  <div className="aspect-square bg-gray-100 overflow-hidden">
+                    {product.images?.[0] && (
+                      <img 
+                        src={product.images[0]} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                      />
+                    )}
                   </div>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault()
+                      removeFavorite(product.id)
+                    }}
+                    className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors"
+                    aria-label="Remove"
+                  >
+                    <X size={14} className="text-red-500" />
+                  </button>
+                </Link>
+                <div className="p-3">
+                  <Link to={`/shop/product/${product.id}`}>
+                    <h3 className="font-medium text-sm text-gray-900 hover:text-emerald-600 mb-1 line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-xs text-gray-500 mb-2">{product.category?.replace('-', ' ')}</p>
+                    <span className="text-xs text-emerald-600 hover:text-emerald-700 font-medium">
+                      View Details →
+                    </span>
+                  </Link>
                 </div>
               </div>
             ))}
