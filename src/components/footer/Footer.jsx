@@ -76,7 +76,7 @@ function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: 'Playfair Display, serif', color: '#d4a574' }}>
               Quick Links
             </h3>
             <ul className="space-y-2 sm:space-y-2.5">
@@ -115,7 +115,7 @@ function Footer() {
 
           {/* Product Categories */}
           <div>
-            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: 'Playfair Display, serif', color: '#d4a574' }}>
               Categories
             </h3>
             <ul className="space-y-2 sm:space-y-2.5">
@@ -139,7 +139,7 @@ function Footer() {
               </li>
             </ul>
             
-            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 mt-5 sm:mt-6" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 mt-5 sm:mt-6" style={{ fontFamily: 'Playfair Display, serif', color: '#d4a574' }}>
               Policies
             </h3>
             <ul className="space-y-2 sm:space-y-2.5">
@@ -166,7 +166,7 @@ function Footer() {
 
           {/* Contact Information */}
           <div>
-            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4" style={{ fontFamily: 'Playfair Display, serif', color: '#d4a574' }}>
               Get In Touch
             </h3>
             <div className="space-y-3 sm:space-y-4">

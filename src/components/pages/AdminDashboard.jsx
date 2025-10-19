@@ -9,13 +9,15 @@ import {
   Menu, 
   X,
   Heading,
-  Image
+  Image,
+  Tag
 } from 'lucide-react'
 import { useAdmin } from '../../contexts/AdminContext'
 import ProductsManager from '../admin/ProductsManager'
 import HomeContentManager from '../admin/HomeContentManager'
 import HeaderContentManager from '../admin/HeaderContentManager'
 import HeroSlidesManager from '../admin/HeroSlidesManager'
+import CouponManager from '../admin/CouponManager'
 
 function AdminDashboard() {
   const { adminLogout } = useAdmin()
@@ -34,6 +36,7 @@ function AdminDashboard() {
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} /> },
     { id: 'hero', label: 'Hero Carousel', icon: <Image size={20} /> },
     { id: 'products', label: 'Products Manager', icon: <Package size={20} /> },
+    { id: 'coupons', label: 'Coupon Manager', icon: <Tag size={20} /> },
     { id: 'home', label: 'Home Content', icon: <Home size={20} /> },
     { id: 'header', label: 'Header Content', icon: <Heading size={20} /> },
     { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
@@ -219,6 +222,7 @@ function AdminDashboard() {
 
           {activeTab === 'hero' && <HeroSlidesManager />}
           {activeTab === 'products' && <ProductsManager />}
+          {activeTab === 'coupons' && <CouponManager />}
           {activeTab === 'home' && <HomeContentManager />}
           {activeTab === 'header' && <HeaderContentManager />}
           

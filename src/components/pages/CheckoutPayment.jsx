@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, CreditCard, Shield, AlertCircle, ExternalLink } from 'lucide-react'
 import { useCart } from '../../contexts/CartContext'
+import { useCoupon } from '../../contexts/CouponContext'
+import { useAuth } from '../../contexts/AuthContext'
 import { saveOrder } from '../../services/db'
+import { recordCouponUsage } from '../../services/coupon-service'
 
 function CheckoutPayment() {
   const navigate = useNavigate()
+  const { currentUser } = useAuth()
   const { items: cartItems, getCartTotal, getCartSavings, clearCart } = useCart()
+  const { appliedCoupon, getDiscountAmount } = useCoupon()
   const [isProcessing, setIsProcessing] = useState(false)
   const [deliveryInfo, setDeliveryInfo] = useState(null)
   const [shippingAddress, setShippingAddress] = useState(null)
@@ -22,8 +27,14 @@ function CheckoutPayment() {
   }, [])
 
   const amountPaise = () => {
-    const total = getCartTotal() + (deliveryInfo?.deliveryPrice || 0)
-    return Math.round(total * 100)
+    const couponDiscount = getDiscountAmount(getCartTotal())
+    const total = getCartTotal() - couponDiscount + (deliveryInfo?.deliveryPrice || 0)
+    return Math.round(Math.max(total, 0) * 100) // Ensure non-negative
+  }
+
+  const getFinalTotal = () => {
+    const couponDiscount = getDiscountAmount(getCartTotal())
+    return Math.max(getCartTotal() - couponDiscount + (deliveryInfo?.deliveryPrice || 0), 0)
   }
 
   const loadRazorpayScript = () => {
@@ -315,6 +326,8 @@ function CheckoutPayment() {
       const deliv = deliveryInfo?.deliveryPrice || 0
       const orderId = response.razorpay_order_id || `order_${Date.now()}`
 
+    const couponDiscount = getDiscountAmount(getCartTotal())
+    
     try {
       await saveOrder({
         orderId,
@@ -323,13 +336,27 @@ function CheckoutPayment() {
         totals: {
           subtotal: getCartTotal(),
           savings: getCartSavings(),
+          couponDiscount: couponDiscount,
           delivery: deliv,
-          total: getCartTotal() + deliv,
+          total: getCartTotal() - couponDiscount + deliv,
         },
         deliveryInfo: deliveryInfo || null,
         shippingAddress: shippingAddress || null,
         paymentMethod: 'razorpay',
+        userId: currentUser?.id || null,
+        couponCode: appliedCoupon?.code || null,
       })
+
+      // Record coupon usage if coupon was applied
+      if (appliedCoupon && couponDiscount > 0) {
+        await recordCouponUsage(
+          appliedCoupon.id,
+          currentUser?.id || null,
+          shippingAddress?.email || null,
+          orderId,
+          couponDiscount
+        )
+      }
     } catch (error) {
       console.error('Failed to save order to Firestore:', error)
       // Continue with email and invoice even if Firestore fails

@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, User, Phone, Mail } from 'lucide-react'
 import { useCart } from '../../contexts/CartContext'
+import { useCoupon } from '../../contexts/CouponContext'
+import CouponInput from '../CouponInput'
 
 function CheckoutAddress() {
   const navigate = useNavigate()
   const { items: cartItems, getCartTotal, getCartSavings } = useCart()
+  const { getDiscountAmount } = useCoupon()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -305,15 +308,32 @@ function CheckoutAddress() {
                 </div>
 
                 <div className="space-y-4">
+                  {/* Coupon Input */}
+                  <div className="pb-4 border-b border-gray-200">
+                    <CouponInput 
+                      cartTotal={getCartTotal()} 
+                      userEmail={formData.email}
+                    />
+                  </div>
+
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal:</span>
                     <span className="font-medium">₹{getCartTotal()}</span>
                   </div>
                   
-                  <div className="flex justify-between text-green-600">
-                    <span>You Save:</span>
-                    <span className="font-medium">₹{getCartSavings()}</span>
-                  </div>
+                  {getCartSavings() > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>You Save:</span>
+                      <span className="font-medium">₹{getCartSavings()}</span>
+                    </div>
+                  )}
+                  
+                  {getDiscountAmount(getCartTotal()) > 0 && (
+                    <div className="flex justify-between text-emerald-600">
+                      <span>Coupon Discount:</span>
+                      <span className="font-medium">-₹{getDiscountAmount(getCartTotal()).toFixed(2)}</span>
+                    </div>
+                  )}
                   
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping:</span>
@@ -323,7 +343,7 @@ function CheckoutAddress() {
                   <div className="border-t border-gray-200 pt-4">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total:</span>
-                      <span>₹{getCartTotal()}</span>
+                      <span>₹{(getCartTotal() - getDiscountAmount(getCartTotal())).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

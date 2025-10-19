@@ -2,10 +2,15 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { saveOrder } from '../../services/db'
 import { useCart } from '../../contexts/CartContext'
+import { useCoupon } from '../../contexts/CouponContext'
+import { useAuth } from '../../contexts/AuthContext'
+import { recordCouponUsage } from '../../services/coupon-service'
 
 function PaymentCallback() {
   const navigate = useNavigate()
+  const { currentUser } = useAuth()
   const { items: cartItems, getCartTotal, getCartSavings, clearCart } = useCart()
+  const { appliedCoupon, getDiscountAmount } = useCoupon()
   const [status, setStatus] = useState('Processing payment...')
 
   useEffect(() => {
@@ -17,6 +22,7 @@ function PaymentCallback() {
         const deliveryInfo = JSON.parse(localStorage.getItem('deliveryInfo') || 'null')
         const shippingAddress = JSON.parse(localStorage.getItem('shippingAddress') || 'null')
         const deliv = deliveryInfo?.deliveryPrice || 0
+        const couponDiscount = getDiscountAmount(getCartTotal())
 
         try {
           await saveOrder({
@@ -26,13 +32,27 @@ function PaymentCallback() {
             totals: {
               subtotal: getCartTotal(),
               savings: getCartSavings(),
+              couponDiscount: couponDiscount,
               delivery: deliv,
-              total: getCartTotal() + deliv,
+              total: getCartTotal() - couponDiscount + deliv,
             },
             deliveryInfo: deliveryInfo || null,
             shippingAddress: shippingAddress || null,
             paymentMethod: 'payment_link',
+            userId: currentUser?.id || null,
+            couponCode: appliedCoupon?.code || null,
           })
+
+          // Record coupon usage if coupon was applied
+          if (appliedCoupon && couponDiscount > 0) {
+            await recordCouponUsage(
+              appliedCoupon.id,
+              currentUser?.id || null,
+              shippingAddress?.email || null,
+              orderId,
+              couponDiscount
+            )
+          }
         } catch (error) {
           console.error('Failed to save order to Firestore:', error)
           // Continue with email and invoice even if Firestore fails
