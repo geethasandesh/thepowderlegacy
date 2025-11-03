@@ -133,24 +133,6 @@ function Products() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10">
-        {/* Top Banner */}
-        <div className="-mx-4 sm:mx-0 mb-4 sm:mb-6">
-          <div className="relative w-full overflow-hidden rounded-none sm:rounded-xl shadow-sm">
-            <img
-              src="/banner.png"
-              alt="Special Offer"
-              className="w-full h-auto max-h-[28rem] sm:max-h-[32rem] object-contain bg-stone-100"
-            />
-            {/* <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent" /> */}
-            <Link
-              to="/shop/product/1760439440012"
-              className="absolute bottom-1 sm:bottom-4 left-1/2 -translate-x-1/2 bg-amber-400 hover:bg-amber-500 text-emerald-900 text-xs sm:text-sm font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-lg ring-1 ring-amber-300"
-            >
-              Grab Now
-            </Link>
-          </div>
-        </div>
-
         {/* Category Pills - Compact Mobile Layout */}
         <div className="mb-3 sm:mb-6">
           {/* Mobile: Horizontal scrollable dots */}
