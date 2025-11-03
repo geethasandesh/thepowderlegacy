@@ -6,6 +6,7 @@ import { useCoupon } from '../../contexts/CouponContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { saveOrder } from '../../services/db'
 import { recordCouponUsage } from '../../services/coupon-service'
+import { pushOrderToEcwid, recordFailedPaymentInEcwid } from '../../services/ecwid-integration'
 
 function CheckoutPayment() {
   const navigate = useNavigate()
@@ -197,7 +198,13 @@ function CheckoutPayment() {
         notes: shippingAddress ? { address: shippingAddress.address } : undefined,
         retry: { enabled: true, max_count: 1 },
         theme: { color: '#15803d' },
-        modal: { ondismiss: function() { setIsProcessing(false) } },
+        modal: { 
+          ondismiss: function() { 
+            console.log('⚠️ User closed Razorpay modal without completing payment')
+            handlePaymentFailed({}, 'Payment cancelled - modal closed')
+            setIsProcessing(false)
+          } 
+        },
         handler: function (response) {
           handlePaymentSuccess(response)
         }
@@ -256,8 +263,60 @@ function CheckoutPayment() {
   }
 
   const handlePaymentFailed = async (response, errorMsg) => {
+    console.log('⚠️ PAYMENT FAILED/CANCELLED:', errorMsg)
+    
     const deliv = deliveryInfo?.deliveryPrice || 0
     const orderId = response?.razorpay_order_id || `failed_order_${Date.now()}`
+    const couponDiscount = getDiscountAmount(getCartTotal())
+    
+    console.log('📋 Preparing failed order data...')
+    console.log('Shipping Address:', shippingAddress)
+    console.log('Cart Items:', cartItems)
+    
+    // Prepare failed order data for database tracking
+    const failedOrderData = {
+      orderId,
+      paymentId: response?.razorpay_payment_id || null,
+      items: cartItems,
+      totals: {
+        subtotal: getCartTotal(),
+        savings: getCartSavings(),
+        couponDiscount: couponDiscount,
+        delivery: deliv,
+        total: getCartTotal() - couponDiscount + deliv,
+      },
+      deliveryInfo: deliveryInfo || null,
+      shippingAddress: shippingAddress || null,
+      paymentMethod: 'razorpay',
+      userId: currentUser?.id || null,
+      couponCode: appliedCoupon?.code || null,
+      errorMessage: errorMsg
+    }
+    
+    console.log('💾 Saving failed payment to database...')
+    
+    // Save failed order to Supabase (for Leads tracking)
+    try {
+      const savedOrder = await saveOrder(failedOrderData)
+      console.log('✅ Failed payment saved to database for leads tracking!', savedOrder)
+      console.log('📍 Go to Admin → Leads to see this!')
+    } catch (error) {
+      console.error('❌ Failed to save failed payment to database:', error)
+      console.error('Error details:', error.message)
+    }
+
+    // Record failed payment in Ecwid (fire-and-forget)
+    recordFailedPaymentInEcwid(failedOrderData)
+      .then(result => {
+        if (result.success) {
+          console.log('✅ Failed payment recorded in Ecwid:', result)
+        } else {
+          console.warn('⚠️ Failed to record failed payment in Ecwid:', result.error)
+        }
+      })
+      .catch(error => {
+        console.error('❌ Error recording failed payment in Ecwid:', error)
+      })
     
     try {
       console.log('📧 CLIENT: Starting failed payment email process...')
@@ -328,24 +387,28 @@ function CheckoutPayment() {
 
     const couponDiscount = getDiscountAmount(getCartTotal())
     
+    // Prepare order data for both Supabase and Ecwid
+    const orderData = {
+      orderId,
+      paymentId: response.razorpay_payment_id,
+      items: cartItems,
+      totals: {
+        subtotal: getCartTotal(),
+        savings: getCartSavings(),
+        couponDiscount: couponDiscount,
+        delivery: deliv,
+        total: getCartTotal() - couponDiscount + deliv,
+      },
+      deliveryInfo: deliveryInfo || null,
+      shippingAddress: shippingAddress || null,
+      paymentMethod: 'razorpay',
+      userId: currentUser?.id || null,
+      couponCode: appliedCoupon?.code || null,
+    }
+    
     try {
-      await saveOrder({
-        orderId,
-        paymentId: response.razorpay_payment_id,
-        items: cartItems,
-        totals: {
-          subtotal: getCartTotal(),
-          savings: getCartSavings(),
-          couponDiscount: couponDiscount,
-          delivery: deliv,
-          total: getCartTotal() - couponDiscount + deliv,
-        },
-        deliveryInfo: deliveryInfo || null,
-        shippingAddress: shippingAddress || null,
-        paymentMethod: 'razorpay',
-        userId: currentUser?.id || null,
-        couponCode: appliedCoupon?.code || null,
-      })
+      // Save to Supabase
+      await saveOrder(orderData)
 
       // Record coupon usage if coupon was applied
       if (appliedCoupon && couponDiscount > 0) {
@@ -358,9 +421,22 @@ function CheckoutPayment() {
         )
       }
     } catch (error) {
-      console.error('Failed to save order to Firestore:', error)
-      // Continue with email and invoice even if Firestore fails
+      console.error('Failed to save order to Supabase:', error)
+      // Continue with email and invoice even if Supabase fails
     }
+
+    // Push order to Ecwid (fire-and-forget, don't block on this)
+    pushOrderToEcwid(orderData)
+      .then(result => {
+        if (result.success) {
+          console.log('✅ Order synced to Ecwid successfully:', result)
+        } else {
+          console.warn('⚠️ Failed to sync order to Ecwid:', result.error)
+        }
+      })
+      .catch(error => {
+        console.error('❌ Error syncing to Ecwid:', error)
+      })
 
     // Generate invoice and trigger download
     const invoiceHtml = generateInvoiceDownload(orderId, response.razorpay_payment_id)

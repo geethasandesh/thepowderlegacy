@@ -25,11 +25,13 @@ function Contact() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      await saveContactMessage(formData)
+      console.log('💬 Saving contact form submission...')
+      const result = await saveContactMessage(formData)
+      console.log('✅ Contact form saved! Check Admin → Leads to see this.', result)
       setIsSubmitted(true)
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
     } catch (err) {
-      console.error('Failed to save contact message', err)
+      console.error('❌ Failed to save contact message:', err)
       alert('There was an error sending your message. Please try again later.')
     } finally {
       setIsSubmitting(false)

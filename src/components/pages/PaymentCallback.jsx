@@ -5,6 +5,7 @@ import { useCart } from '../../contexts/CartContext'
 import { useCoupon } from '../../contexts/CouponContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { recordCouponUsage } from '../../services/coupon-service'
+import { pushOrderToEcwid } from '../../services/ecwid-integration'
 
 function PaymentCallback() {
   const navigate = useNavigate()
@@ -24,24 +25,28 @@ function PaymentCallback() {
         const deliv = deliveryInfo?.deliveryPrice || 0
         const couponDiscount = getDiscountAmount(getCartTotal())
 
+        // Prepare order data for both Supabase and Ecwid
+        const orderData = {
+          orderId,
+          paymentId,
+          items: cartItems,
+          totals: {
+            subtotal: getCartTotal(),
+            savings: getCartSavings(),
+            couponDiscount: couponDiscount,
+            delivery: deliv,
+            total: getCartTotal() - couponDiscount + deliv,
+          },
+          deliveryInfo: deliveryInfo || null,
+          shippingAddress: shippingAddress || null,
+          paymentMethod: 'payment_link',
+          userId: currentUser?.id || null,
+          couponCode: appliedCoupon?.code || null,
+        }
+
         try {
-          await saveOrder({
-            orderId,
-            paymentId,
-            items: cartItems,
-            totals: {
-              subtotal: getCartTotal(),
-              savings: getCartSavings(),
-              couponDiscount: couponDiscount,
-              delivery: deliv,
-              total: getCartTotal() - couponDiscount + deliv,
-            },
-            deliveryInfo: deliveryInfo || null,
-            shippingAddress: shippingAddress || null,
-            paymentMethod: 'payment_link',
-            userId: currentUser?.id || null,
-            couponCode: appliedCoupon?.code || null,
-          })
+          // Save to Supabase
+          await saveOrder(orderData)
 
           // Record coupon usage if coupon was applied
           if (appliedCoupon && couponDiscount > 0) {
@@ -54,9 +59,22 @@ function PaymentCallback() {
             )
           }
         } catch (error) {
-          console.error('Failed to save order to Firestore:', error)
-          // Continue with email and invoice even if Firestore fails
+          console.error('Failed to save order to Supabase:', error)
+          // Continue with email and invoice even if Supabase fails
         }
+
+        // Push order to Ecwid (fire-and-forget)
+        pushOrderToEcwid(orderData)
+          .then(result => {
+            if (result.success) {
+              console.log('✅ CALLBACK: Order synced to Ecwid:', result)
+            } else {
+              console.warn('⚠️ CALLBACK: Failed to sync to Ecwid:', result.error)
+            }
+          })
+          .catch(error => {
+            console.error('❌ CALLBACK: Error syncing to Ecwid:', error)
+          })
         // Build invoice HTML and trigger download
         try {
           const rows = cartItems.map(it => `<tr><td>${it.name} (${it.size})</td><td>${it.quantity}</td><td>₹${it.price}</td><td>₹${it.price * it.quantity}</td></tr>`).join('')

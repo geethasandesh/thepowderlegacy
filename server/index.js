@@ -3,6 +3,8 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import sendOrderEmailHandler from '../api/send-order-email.js'
 import sendFailedPaymentEmailHandler from '../api/send-failed-payment-email.js'
+import sendLeadEmailHandler from '../api/send-lead-email.js'
+import sendBulkEmailHandler from '../api/send-bulk-email.js'
 
 // Load environment variables
 dotenv.config()
@@ -37,6 +39,29 @@ app.post('/api/send-failed-payment-email', async (req, res) => {
   } catch (error) {
     console.error('🌐 SERVER ERROR:', error)
     console.error('🌐 SERVER ERROR Message:', error.message)
+    res.status(500).json({ error: error.message || 'Internal server error' })
+  }
+})
+
+app.post('/api/send-lead-email', async (req, res) => {
+  console.log('🌐 SERVER: Received request to /api/send-lead-email')
+  console.log('🌐 SERVER: Email type:', req.body.emailType)
+  console.log('🌐 SERVER: Recipient:', req.body.leadData?.email)
+  try {
+    await sendLeadEmailHandler(req, res)
+  } catch (error) {
+    console.error('🌐 SERVER ERROR:', error)
+    res.status(500).json({ error: error.message || 'Internal server error' })
+  }
+})
+
+app.post('/api/send-bulk-email', async (req, res) => {
+  console.log('🌐 SERVER: Received request to /api/send-bulk-email')
+  console.log('🌐 SERVER: Recipients count:', req.body.recipients?.length || 0)
+  try {
+    await sendBulkEmailHandler(req, res)
+  } catch (error) {
+    console.error('🌐 SERVER ERROR:', error)
     res.status(500).json({ error: error.message || 'Internal server error' })
   }
 })

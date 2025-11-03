@@ -10,7 +10,12 @@ import {
   X,
   Heading,
   Image,
-  Tag
+  Tag,
+  ShoppingBag,
+  XCircle,
+  BarChart3,
+  Users,
+  MailPlus
 } from 'lucide-react'
 import { useAdmin } from '../../contexts/AdminContext'
 import ProductsManager from '../admin/ProductsManager'
@@ -18,11 +23,16 @@ import HomeContentManager from '../admin/HomeContentManager'
 import HeaderContentManager from '../admin/HeaderContentManager'
 import HeroSlidesManager from '../admin/HeroSlidesManager'
 import CouponManager from '../admin/CouponManager'
+import OrdersManager from '../admin/OrdersManager'
+import FailedPaymentsManager from '../admin/FailedPaymentsManager'
+import AnalyticsDashboard from '../admin/AnalyticsDashboard'
+import LeadsManager from '../admin/LeadsManager'
+import EmailMarketingManager from '../admin/EmailMarketingManager'
 
 function AdminDashboard() {
   const { adminLogout } = useAdmin()
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState('analytics')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false) // Start closed on mobile
 
   const handleLogout = () => {
@@ -33,13 +43,16 @@ function AdminDashboard() {
   }
 
   const menuItems = [
-    { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} /> },
-    { id: 'hero', label: 'Hero Carousel', icon: <Image size={20} /> },
-    { id: 'products', label: 'Products Manager', icon: <Package size={20} /> },
-    { id: 'coupons', label: 'Coupon Manager', icon: <Tag size={20} /> },
-    { id: 'home', label: 'Home Content', icon: <Home size={20} /> },
-    { id: 'header', label: 'Header Content', icon: <Heading size={20} /> },
-    { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
+    { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={20} />, description: 'View sales & stats' },
+    { id: 'orders', label: 'All Orders', icon: <ShoppingBag size={20} />, description: 'Manage orders' },
+    { id: 'leads', label: 'Leads', icon: <Users size={20} />, description: 'Track potential customers' },
+    { id: 'failed', label: 'Failed Payments', icon: <XCircle size={20} />, description: 'Track failed orders' },
+    { id: 'email-marketing', label: 'Email Marketing', icon: <MailPlus size={20} />, description: 'Send bulk emails' },
+    { id: 'products', label: 'Products', icon: <Package size={20} />, description: 'Manage products' },
+    { id: 'coupons', label: 'Coupons', icon: <Tag size={20} />, description: 'Manage coupons' },
+    { id: 'hero', label: 'Hero Slides', icon: <Image size={20} />, description: 'Edit homepage slides' },
+    { id: 'home', label: 'Home Content', icon: <Home size={20} />, description: 'Edit home page' },
+    { id: 'header', label: 'Header', icon: <Heading size={20} />, description: 'Edit header' },
   ]
 
   return (
@@ -137,101 +150,16 @@ function AdminDashboard() {
 
         {/* Content Area */}
         <div className="p-4 lg:p-6">
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white rounded-lg shadow-sm p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">Total Products</p>
-                      <h3 className="text-2xl font-bold text-gray-900">12</h3>
-                    </div>
-                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                      <Package className="text-emerald-800" size={24} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">Categories</p>
-                      <h3 className="text-2xl font-bold text-gray-900">5</h3>
-                    </div>
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <LayoutDashboard className="text-blue-800" size={24} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">Content Sections</p>
-                      <h3 className="text-2xl font-bold text-gray-900">5</h3>
-                    </div>
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <Home className="text-purple-800" size={24} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <h3 className="text-base font-bold text-gray-900 mb-3">Quick Actions</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <button
-                    onClick={() => setActiveTab('products')}
-                    className="p-4 border-2 border-emerald-200 rounded-lg hover:bg-emerald-50 transition-colors text-left"
-                  >
-                    <Package className="text-emerald-800 mb-2" size={24} />
-                    <h4 className="font-semibold text-gray-900">Manage Products</h4>
-                    <p className="text-sm text-gray-600">Add, edit, or remove products</p>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab('home')}
-                    className="p-4 border-2 border-blue-200 rounded-lg hover:bg-blue-50 transition-colors text-left"
-                  >
-                    <Home className="text-blue-800 mb-2" size={24} />
-                    <h4 className="font-semibold text-gray-900">Edit Home Content</h4>
-                    <p className="text-sm text-gray-600">Update homepage sections</p>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab('header')}
-                    className="p-4 border-2 border-purple-200 rounded-lg hover:bg-purple-50 transition-colors text-left"
-                  >
-                    <Heading className="text-purple-800 mb-2" size={24} />
-                    <h4 className="font-semibold text-gray-900">Header Settings</h4>
-                    <p className="text-sm text-gray-600">Customize header content</p>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab('settings')}
-                    className="p-4 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                  >
-                    <Settings className="text-gray-800 mb-2" size={24} />
-                    <h4 className="font-semibold text-gray-900">Settings</h4>
-                    <p className="text-sm text-gray-600">Configure site settings</p>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'hero' && <HeroSlidesManager />}
+          {activeTab === 'analytics' && <AnalyticsDashboard />}
+          {activeTab === 'orders' && <OrdersManager />}
+          {activeTab === 'leads' && <LeadsManager />}
+          {activeTab === 'failed' && <FailedPaymentsManager />}
+          {activeTab === 'email-marketing' && <EmailMarketingManager />}
           {activeTab === 'products' && <ProductsManager />}
           {activeTab === 'coupons' && <CouponManager />}
+          {activeTab === 'hero' && <HeroSlidesManager />}
           {activeTab === 'home' && <HomeContentManager />}
           {activeTab === 'header' && <HeaderContentManager />}
-          
-          {activeTab === 'settings' && (
-            <div className="bg-white rounded-lg shadow-md p-4 lg:p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Settings</h3>
-              <p className="text-gray-600">Settings panel coming soon...</p>
-            </div>
-          )}
         </div>
       </main>
     </div>
