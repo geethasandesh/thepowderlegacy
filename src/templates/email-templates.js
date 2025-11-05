@@ -3,6 +3,9 @@
  * All templates are dynamic and personalized with customer data
  */
 
+// Logo URL - hosted on the website
+const LOGO_URL = 'https://thepowderlegacy.in/logo.png'
+
 /**
  * Abandoned Cart Recovery Email
  * Sent when customer leaves items in cart without completing payment
@@ -37,9 +40,10 @@ export function abandonedCartTemplate(leadData) {
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           
-          <!-- Header -->
+          <!-- Header with Logo -->
           <tr>
             <td style="background-color: #2d5f3f; padding: 30px; text-align: center;">
+              <img src="${LOGO_URL}" alt="The Powder Legacy Logo" style="width: 120px; height: auto; margin-bottom: 15px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px;">The Powder Legacy</h1>
               <p style="margin: 10px 0 0 0; color: #e0e0e0; font-size: 14px;">100% Hand-Made Traditional Products</p>
             </td>
@@ -143,9 +147,10 @@ export function paymentIssueTemplate(leadData) {
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           
-          <!-- Header -->
+          <!-- Header with Logo -->
           <tr>
             <td style="background-color: #2d5f3f; padding: 30px; text-align: center;">
+              <img src="${LOGO_URL}" alt="The Powder Legacy Logo" style="width: 120px; height: auto; margin-bottom: 15px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px;">The Powder Legacy</h1>
             </td>
           </tr>
@@ -258,9 +263,10 @@ export function welcomeCustomerTemplate(leadData) {
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           
-          <!-- Header -->
+          <!-- Header with Logo -->
           <tr>
             <td style="background-color: #2d5f3f; padding: 40px 30px; text-align: center;">
+              <img src="${LOGO_URL}" alt="The Powder Legacy Logo" style="width: 140px; height: auto; margin-bottom: 20px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 32px;">Welcome! 🌿</h1>
             </td>
           </tr>
@@ -356,9 +362,10 @@ export function firstPurchaseFollowUpTemplate(leadData) {
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           
-          <!-- Header -->
+          <!-- Header with Logo -->
           <tr>
             <td style="background-color: #2d5f3f; padding: 30px; text-align: center;">
+              <img src="${LOGO_URL}" alt="The Powder Legacy Logo" style="width: 120px; height: auto; margin-bottom: 15px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px;">Still Thinking? 💭</h1>
             </td>
           </tr>
@@ -474,9 +481,10 @@ export function contactResponseTemplate(leadData) {
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           
-          <!-- Header -->
+          <!-- Header with Logo -->
           <tr>
             <td style="background-color: #2d5f3f; padding: 30px; text-align: center;">
+              <img src="${LOGO_URL}" alt="The Powder Legacy Logo" style="width: 120px; height: auto; margin-bottom: 15px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px;">Thank You for Contacting Us!</h1>
             </td>
           </tr>
@@ -551,6 +559,197 @@ export function contactResponseTemplate(leadData) {
 }
 
 /**
+ * Signup Welcome Email - sent when user creates an account
+ * Based on the exact format requested by client
+ */
+export function signupWelcomeTemplate(userData) {
+  const { name, email } = userData
+  const resetPasswordUrl = userData.resetPasswordUrl || 'https://thepowderlegacy.in/reset-password'
+  const accountUrl = 'https://thepowderlegacy.in/account'
+  const facebookUrl = 'https://www.facebook.com/thepowderlegacy'
+  const instagramUrl = 'https://www.instagram.com/thepowderlegacy'
+
+  return {
+    subject: 'Welcome to The Powder Legacy! Your Journey to Natural Wellness Begins Here 🌿',
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          
+          <!-- TPL Logo Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #2d5f3f 0%, #1e4a2f 100%); padding: 40px 30px; text-align: center;">
+              <img src="${LOGO_URL}" alt="The Powder Legacy Logo" style="width: 150px; height: auto; margin-bottom: 20px;" />
+              <h1 style="margin: 0 0 10px 0; color: #ffffff; font-size: 32px; font-weight: bold;">The Powder Legacy</h1>
+              <p style="margin: 0; color: #e0e0e0; font-size: 14px; letter-spacing: 1px;">100% NATURAL • HAND-MADE • TRADITIONAL</p>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 26px; font-weight: 600;">Hi ${name},</h2>
+              
+              <p style="margin: 0 0 20px 0; color: #555; font-size: 16px; line-height: 1.6;">
+                A very warm welcome to <strong>The Powder Legacy</strong> family! We're so thrilled you've decided to join our community dedicated to authentic, herbal wellness.
+              </p>
+
+              <p style="margin: 0 0 30px 0; color: #555; font-size: 16px; line-height: 1.6;">
+                Your account has been successfully created, giving you access to a simpler and faster shopping experience.
+              </p>
+
+              <!-- Account Details Box -->
+              <div style="background-color: #f9fdf9; border: 2px solid #2d5f3f; border-radius: 8px; padding: 25px; margin: 0 0 30px 0;">
+                <h3 style="margin: 0 0 15px 0; color: #2d5f3f; font-size: 18px; font-weight: 600;">Your Account Details:</h3>
+                <table width="100%" cellpadding="8" cellspacing="0">
+                  <tr>
+                    <td style="color: #666; font-size: 15px; padding: 8px 0;"><strong>Username:</strong></td>
+                    <td style="color: #333; font-size: 15px; padding: 8px 0;">${name}</td>
+                  </tr>
+                  <tr>
+                    <td style="color: #666; font-size: 15px; padding: 8px 0;"><strong>Email:</strong></td>
+                    <td style="color: #333; font-size: 15px; padding: 8px 0;">${email}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Password Setup (if confirmation required) -->
+              ${resetPasswordUrl && resetPasswordUrl !== 'https://thepowderlegacy.in/reset-password' ? `
+              <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 0 0 30px 0; border-radius: 4px;">
+                <p style="margin: 0 0 15px 0; color: #856404; font-size: 15px; line-height: 1.6;">
+                  <strong>⚠️ Action Required:</strong> To activate your account and set your password, please click the button below.
+                </p>
+                <p style="margin: 0; color: #856404; font-size: 13px;">
+                  (This link is secure and will expire in 24 hours for your security.)
+                </p>
+              </div>
+
+              <!-- Set Password Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
+                <tr>
+                  <td align="center">
+                    <a href="${resetPasswordUrl}" style="display: inline-block; background-color: #2d5f3f; color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 6px; font-size: 16px; font-weight: bold;">
+                      Set Your Password
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+
+              <!-- What You Can Do Now -->
+              <h3 style="margin: 30px 0 20px 0; color: #2d5f3f; font-size: 20px; font-weight: 600;">✨ What You Can Do Now:</h3>
+              
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #eee;">
+                    <p style="margin: 0; color: #555; font-size: 15px; line-height: 1.6;">
+                      <strong style="color: #2d5f3f;">📊 Access Your Account Dashboard:</strong><br>
+                      <a href="${accountUrl}" style="color: #2d5f3f; text-decoration: underline;">[My Account]</a>
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #eee;">
+                    <p style="margin: 0; color: #555; font-size: 15px; line-height: 1.6;">
+                      <strong style="color: #2d5f3f;">📦 Track Your Orders:</strong><br>
+                      Track your orders and view your history
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #eee;">
+                    <p style="margin: 0; color: #555; font-size: 15px; line-height: 1.6;">
+                      <strong style="color: #2d5f3f;">❤️ Save Favorites:</strong><br>
+                      Save your favorite products to a wishlist
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0;">
+                    <p style="margin: 0; color: #555; font-size: 15px; line-height: 1.6;">
+                      <strong style="color: #2d5f3f;">📍 Manage Addresses:</strong><br>
+                      Manage your shipping addresses for faster checkout
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Social Media -->
+              <div style="background-color: #f0f8f4; padding: 25px; border-radius: 8px; margin: 0 0 30px 0; text-align: center;">
+                <p style="margin: 0 0 15px 0; color: #333; font-size: 16px; font-weight: 600;">
+                  🌿 Follow Our Journey
+                </p>
+                <p style="margin: 0 0 15px 0; color: #666; font-size: 14px;">
+                  Connect with us for daily wellness tips and community stories
+                </p>
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" style="padding: 5px;">
+                      <a href="${facebookUrl}" style="display: inline-block; background-color: #1877f2; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 14px; margin: 5px;">
+                        📘 Facebook
+                      </a>
+                      <a href="${instagramUrl}" style="display: inline-block; background-color: #E4405F; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 14px; margin: 5px;">
+                        📷 Instagram
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <p style="margin: 0 0 20px 0; color: #555; font-size: 16px; line-height: 1.6;">
+                Thank you for trusting us with your wellness ritual. We can't wait to be a part of your journey to a more natural you.
+              </p>
+
+              <p style="margin: 0 0 30px 0; color: #555; font-size: 16px; line-height: 1.6; font-style: italic;">
+                <strong>With gratitude,</strong><br>
+                The Team at The Powder Legacy<br>
+                <a href="https://www.thepowderlegacy.com" style="color: #2d5f3f;">www.thepowderlegacy.com</a>
+              </p>
+
+              <!-- P.S. Contact Section -->
+              <div style="background-color: #fff9e6; border-left: 4px solid #2d5f3f; padding: 20px; border-radius: 4px;">
+                <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6;">
+                  <strong>P.S.</strong> Have a question or need help choosing the right product for you? Simply reply to this email or WhatsApp us on <strong style="color: #2d5f3f;">+91 – 7093 121 689</strong> —we love helping our community find their perfect match!
+                </p>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9f9f9; padding: 25px 30px; text-align: center; border-top: 1px solid #eee;">
+              <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">
+                📧 contact@thepowderlegacy.in • 📞 +91-7093 121 689
+              </p>
+              <p style="margin: 0 0 10px 0; color: #999; font-size: 12px;">
+                Plot No. 542, Dr. Prakashrao Nagar, Ghatkesar – 500088, Telangana, India
+              </p>
+              <p style="margin: 0; color: #999; font-size: 12px;">
+                © ${new Date().getFullYear()} The Powder Legacy. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `
+  }
+}
+
+/**
  * Generic Template for Custom Messages
  */
 export function customEmailTemplate(name, customMessage, customSubject = 'Message from The Powder Legacy') {
@@ -569,9 +768,10 @@ export function customEmailTemplate(name, customMessage, customSubject = 'Messag
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           
-          <!-- Header -->
+          <!-- Header with Logo -->
           <tr>
             <td style="background-color: #2d5f3f; padding: 30px; text-align: center;">
+              <img src="${LOGO_URL}" alt="The Powder Legacy Logo" style="width: 120px; height: auto; margin-bottom: 15px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px;">The Powder Legacy</h1>
             </td>
           </tr>

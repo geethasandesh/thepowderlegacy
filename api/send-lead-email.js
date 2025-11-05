@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
   try {
     const { 
-      emailType,       // 'abandoned-cart', 'payment-issue', 'welcome', 'follow-up', 'custom'
+      emailType,       // 'abandoned-cart', 'payment-issue', 'welcome', 'signup-welcome', 'follow-up', 'custom'
       leadData,        // Lead information (name, email, items, cartValue, etc.)
       customMessage,   // For custom emails
       customSubject    // For custom emails
@@ -50,7 +50,8 @@ export default async function handler(req, res) {
       paymentIssueTemplate, 
       welcomeCustomerTemplate,
       firstPurchaseFollowUpTemplate,
-      customEmailTemplate
+      customEmailTemplate,
+      signupWelcomeTemplate
     } = await import('../src/templates/email-templates.js')
 
     // Select appropriate template
@@ -65,6 +66,9 @@ export default async function handler(req, res) {
         break
       case 'welcome':
         emailContent = welcomeCustomerTemplate(leadData)
+        break
+      case 'signup-welcome':
+        emailContent = signupWelcomeTemplate(leadData)
         break
       case 'follow-up':
         emailContent = firstPurchaseFollowUpTemplate(leadData)

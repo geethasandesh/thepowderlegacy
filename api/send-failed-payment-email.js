@@ -1,6 +1,9 @@
 import nodemailer from 'nodemailer'
 import puppeteer from 'puppeteer'
 
+// Logo URL - hosted on the website
+const LOGO_URL = 'https://thepowderlegacy.in/logo.png'
+
 async function generateActualPDFFromHtml(html) {
   try {
     const browser = await puppeteer.launch({
@@ -52,6 +55,7 @@ function renderCustomerFailedEmail(data) {
   <body style="font-family:Arial,sans-serif;background:#f9f9f9;padding:20px;color:#333;">
     <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08);overflow:hidden;">
       <div style="padding:24px;border-bottom:1px solid #eee;text-align:center;background:#fff3cd;">
+        <img src="${LOGO_URL}" alt="The Powder Legacy Logo" style="width:100px;height:auto;margin-bottom:12px;" />
         <h1 style="margin:0;font-size:22px;color:#856404;">⚠️ Payment Issue - The Powder Legacy</h1>
         <p style="margin:8px 0 0 0;color:#856404;font-size:14px;">Order ID: ${data.orderId}</p>
       </div>

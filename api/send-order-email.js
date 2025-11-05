@@ -1,6 +1,9 @@
 import nodemailer from 'nodemailer'
 import puppeteer from 'puppeteer'
 
+// Logo URL - hosted on the website
+const LOGO_URL = 'https://thepowderlegacy.in/logo.png'
+
 async function generateActualPDFFromHtml(html) {
   try {
     const browser = await puppeteer.launch({
@@ -100,7 +103,7 @@ function generateInvoicePDF(data) {
 </head>
 <body>
     <div class="header">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Logo" class="logo">
+        <img src="${LOGO_URL}" alt="The Powder Legacy Logo" class="logo">
         <div class="company-info">
             <h1 class="company-name">THE POWDER LEGACY</h1>
             <p class="company-tagline">100% HAND-MADE • Traditional Self-Care Products</p>
@@ -175,35 +178,207 @@ function createTransporter() {
 }
 
 function renderCustomerEmail(data) {
-  const itemsHtml = (data.orderItems || [])
-    .map((i) => `<li><strong>${i.title}</strong> × ${i.quantity} — ₹${i.price} (₹${i.price * i.quantity})</li>`) 
-    .join('')
-  const addressHtml = (data.customerAddress || '')
-    .split('\n').map((l) => l.trim()).filter(Boolean).join('<br/>')
-  return `<!doctype html><html><head><meta charset="utf-8"/><title>Order Confirmation</title></head>
-  <body style="font-family:Arial,sans-serif;background:#f9f9f9;padding:20px;color:#333;">
-    <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08);overflow:hidden;">
-      <div style="padding:24px;border-bottom:1px solid #eee;text-align:center;">
-        <h1 style="margin:0;font-size:22px;color:#2c3e50;">✅ Your Order with The Powder Legacy is Confirmed</h1>
-      </div>
-      <div style="padding:24px;line-height:1.6;">
-        <p>Hi ${data.customerName || 'Customer'},</p>
-        <p>Thank you for shopping with The Powder Legacy! 🎉 Your payment was successful.</p>
-        <div style="background:#f8f9fa;padding:16px;border-radius:8px;margin:18px 0;">
-          <div><strong>📦 Order Details</strong></div>
-          <ul style="margin:8px 0 0 20px;">${itemsHtml}</ul>
-          <p><span>Total Amount:</span> <strong>₹${data.orderTotal}</strong></p>
-          <p><span>Payment Method:</span> <strong>${data.paymentMethod || 'Razorpay'}</strong></p>
-        </div>
-        ${addressHtml ? `<div style="background:#f8f9fa;padding:16px;border-radius:8px;">
-          <div><strong>🏠 Delivery Address</strong></div>
-          <div>${addressHtml}</div>
-        </div>` : ''}
-        <p>Your invoice has been downloaded automatically. You can reply to this email for any help.</p>
-        <p>Warm regards,<br/>The Powder Legacy</p>
-      </div>
-    </div>
-  </body></html>`
+  // Build order items table
+  const itemsRows = (data.orderItems || [])
+    .map((item) => `
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+          <strong style="color: #333; font-size: 15px;">${item.title}</strong>
+        </td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">×${item.quantity}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">₹${(item.price * item.quantity).toFixed(2)}</td>
+      </tr>
+    `).join('')
+  
+  // Parse address
+  const addressLines = (data.customerAddress || '').split('\n').map((l) => l.trim()).filter(Boolean)
+  const addressHtml = addressLines.join('<br/>')
+  
+  // Get order date
+  const orderDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  
+  // Calculate shipping
+  const subtotal = parseFloat(data.subtotal) || 0
+  const delivery = parseFloat(data.delivery) || 0
+  const shippingText = delivery === 0 ? 'Free shipping' : `₹${delivery.toFixed(2)}`
+  
+  // Determine payment method display
+  const paymentMethodDisplay = (data.paymentMethod || 'Razorpay').toLowerCase().includes('razorpay') ? 'Online Payment (Razorpay)' : data.paymentMethod
+  
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Order is Confirmed - The Powder Legacy</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          
+          <!-- Header with Logo -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #2d5f3f 0%, #1e4a2f 100%); padding: 40px 30px; text-align: center;">
+              <img src="${LOGO_URL}" alt="The Powder Legacy Logo" style="width: 140px; height: auto; margin-bottom: 20px;" />
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 24px; font-weight: 600;">Hi ${data.customerName || 'Customer'},</h2>
+              
+              <p style="margin: 0 0 15px 0; color: #555; font-size: 16px; line-height: 1.6;">
+                Thank you so much for your order! Your journey to authentic, herbal wellness has officially begun. We are truly grateful you've chosen to bring our powders into your ritual.
+              </p>
+
+              <p style="margin: 0 0 30px 0; color: #555; font-size: 16px; line-height: 1.6;">
+                Your order has been received and is now being carefully processed by our team.
+              </p>
+
+              <!-- Order Summary Box -->
+              <div style="background-color: #f9fdf9; border: 2px solid #2d5f3f; border-radius: 8px; padding: 25px; margin: 0 0 30px 0;">
+                <h3 style="margin: 0 0 15px 0; color: #2d5f3f; font-size: 18px; font-weight: 600;">
+                  📦 Order #${data.orderId || 'N/A'}
+                </h3>
+                <p style="margin: 0 0 20px 0; color: #666; font-size: 14px;">
+                  <strong>Placed on:</strong> ${orderDate}
+                </p>
+
+                <!-- Order Items Table -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden;">
+                  <thead>
+                    <tr style="background-color: #f0f8f4;">
+                      <th style="padding: 12px; text-align: left; color: #2d5f3f; font-weight: 600;">Product</th>
+                      <th style="padding: 12px; text-align: center; color: #2d5f3f; font-weight: 600;">Qty</th>
+                      <th style="padding: 12px; text-align: right; color: #2d5f3f; font-weight: 600;">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${itemsRows}
+                  </tbody>
+                </table>
+
+                <!-- Totals -->
+                <table width="100%" cellpadding="8" cellspacing="0" style="margin-top: 15px;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #666; font-size: 15px;"><strong>Subtotal:</strong></td>
+                    <td style="padding: 8px 0; text-align: right; color: #333; font-size: 15px;">₹${subtotal.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666; font-size: 15px;"><strong>Shipping:</strong> ${shippingText}</td>
+                    <td style="padding: 8px 0; text-align: right; color: #333; font-size: 15px;">${shippingText}</td>
+                  </tr>
+                  <tr style="border-top: 2px solid #2d5f3f;">
+                    <td style="padding: 12px 0; color: #2d5f3f; font-size: 18px; font-weight: bold;"><strong>Total:</strong></td>
+                    <td style="padding: 12px 0; text-align: right; color: #2d5f3f; font-size: 18px; font-weight: bold;">₹${(data.orderTotal || 0).toFixed(2)}</td>
+                  </tr>
+                </table>
+
+                <p style="margin: 15px 0 0 0; color: #666; font-size: 14px;">
+                  <strong>Payment method:</strong> ${paymentMethodDisplay}
+                </p>
+              </div>
+
+              <!-- Next Steps Section -->
+              <div style="background-color: #fff9e6; border-left: 4px solid #2d5f3f; padding: 20px; margin: 0 0 30px 0; border-radius: 4px;">
+                <h3 style="margin: 0 0 15px 0; color: #2d5f3f; font-size: 18px; font-weight: 600;">
+                  📋 Next Steps & What to Expect:
+                </h3>
+                <ul style="margin: 0; padding-left: 20px; color: #555; font-size: 15px; line-height: 1.8;">
+                  <li style="margin-bottom: 10px;">
+                    <strong>Order Processing:</strong> We will carefully hand-pack your items with love. This usually takes 1 to 2 business days.
+                  </li>
+                  <li style="margin-bottom: 10px;">
+                    <strong>Shipment Notification:</strong> You will receive another email with your tracking number as soon as your package is on its way.
+                  </li>
+                  <li>
+                    <strong>Delivery:</strong> ${paymentMethodDisplay.toLowerCase().includes('cod') || paymentMethodDisplay.toLowerCase().includes('cash') ? `Please have the exact amount ready (₹${(data.orderTotal || 0).toFixed(2)}) for our delivery partner.` : 'Your order will be delivered to your address.'}
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Customer Details -->
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 0 0 30px 0;">
+                <h3 style="margin: 0 0 15px 0; color: #2d5f3f; font-size: 18px; font-weight: 600;">
+                  Customer Details
+                </h3>
+                <p style="margin: 0 0 10px 0; color: #555; font-size: 14px;">
+                  <strong>Username:</strong> ${data.customerEmail ? data.customerEmail.split('@')[0] : 'Customer'}
+                </p>
+                <p style="margin: 0 0 15px 0; color: #666; font-size: 13px; font-style: italic;">
+                  Haven't set a password yet? <a href="https://thepowderlegacy.in/reset-password" style="color: #2d5f3f; text-decoration: underline;">Set Your Password Here</a> to easily track your order and manage your account.
+                </p>
+                ${addressHtml ? `
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                  <p style="margin: 0 0 10px 0; color: #2d5f3f; font-size: 15px; font-weight: 600;">
+                    📍 Shipping Address:
+                  </p>
+                  <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6;">
+                    ${addressHtml}
+                  </p>
+                  ${data.customerPhone ? `<p style="margin: 10px 0 0 0; color: #555; font-size: 14px;"><strong>Phone:</strong> ${data.customerPhone}</p>` : ''}
+                </div>
+                ` : ''}
+              </div>
+
+              <!-- Help Section -->
+              <div style="background-color: #e8f5e9; padding: 20px; border-radius: 8px; margin: 0 0 30px 0;">
+                <h3 style="margin: 0 0 10px 0; color: #2d5f3f; font-size: 17px; font-weight: 600;">
+                  💚 We're Here to Help
+                </h3>
+                <p style="margin: 0 0 15px 0; color: #555; font-size: 15px; line-height: 1.6;">
+                  If you have any questions about your order or need to make a change, please simply reply to this email or contact us at <a href="mailto:contact@thepowderlegacy.in" style="color: #2d5f3f; text-decoration: underline;">contact@thepowderlegacy.in</a>.
+                </p>
+                <p style="margin: 0; color: #555; font-size: 15px;">
+                  Alternatively, WhatsApp us on <strong style="color: #2d5f3f;">+91 - 7093 121 689</strong>
+                </p>
+              </div>
+
+              <!-- Closing -->
+              <p style="margin: 0 0 15px 0; color: #555; font-size: 16px; line-height: 1.6;">
+                Thank you for trusting us with your care. We can't wait for you to experience the difference of nature's finest.
+              </p>
+
+              <p style="margin: 0 0 30px 0; color: #555; font-size: 16px; line-height: 1.6; font-style: italic;">
+                <strong>With gratitude,</strong><br>
+                The Team at The Powder Legacy<br>
+                <a href="https://www.thepowderlegacy.com" style="color: #2d5f3f; text-decoration: none;">www.thepowderlegacy.in</a>
+              </p>
+
+              <!-- P.S. Section -->
+              <div style="background-color: #fff9e6; border-left: 4px solid #2d5f3f; padding: 15px; border-radius: 4px;">
+                <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6;">
+                  <strong>P.S.</strong> Follow your order's journey and discover the stories behind our powders on Instagram <a href="https://www.instagram.com/thepowderlegacy" style="color: #2d5f3f; text-decoration: underline;">@thepowderlegacy</a>!
+                </p>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9f9f9; padding: 25px 30px; text-align: center; border-top: 1px solid #eee;">
+              <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">
+                📧 contact@thepowderlegacy.in • 📞 +91-7093 121 689
+              </p>
+              <p style="margin: 0 0 10px 0; color: #999; font-size: 12px;">
+                Plot No. 542, Dr. Prakashrao Nagar, Ghatkesar – 500088, Telangana, India
+              </p>
+              <p style="margin: 0; color: #999; font-size: 12px;">
+                © ${new Date().getFullYear()} The Powder Legacy. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
 }
 
 function renderAdminEmail(data) {
@@ -309,7 +484,7 @@ export default async function handler(req, res) {
       const customerResult = await transporter.sendMail({
         from: process.env.SMTP_USER || 'moksh.dev0411@gmail.com',
         to: body.customerEmail,
-        subject: '✅ Payment Successful - The Powder Legacy',
+        subject: `Your Powder Legacy Order #${body.orderId || 'XXXX'} is Confirmed!`,
         html: renderCustomerEmail(body),
         attachments,
       })

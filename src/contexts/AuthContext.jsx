@@ -67,6 +67,50 @@ export function AuthProvider({ children }) {
       console.warn('Could not link guest orders:', err)
     }
     
+    // Send welcome email (fire-and-forget, don't block signup)
+    try {
+      console.log('📧 Sending welcome email to:', email)
+      
+      // Determine the correct API URL based on environment
+      const apiUrl = import.meta.env.DEV 
+        ? '/api/send-lead-email'  // Development: use Vite proxy
+        : 'http://localhost:3001/api/send-lead-email'  // Direct to API server
+      
+      console.log('📧 API URL:', apiUrl)
+      
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emailType: 'signup-welcome',
+          leadData: {
+            name: displayName || 'Customer',
+            email: email,
+            resetPasswordUrl: data.user?.email_confirmed_at ? null : undefined
+          }
+        })
+      })
+        .then(res => {
+          console.log('📧 Email API response status:', res.status)
+          if (res.ok) {
+            return res.json()
+          } else {
+            return res.text().then(text => {
+              console.error('❌ Email API error response:', text)
+              throw new Error(`Email API returned ${res.status}`)
+            })
+          }
+        })
+        .then(result => {
+          console.log('✅ Welcome email sent successfully:', result)
+        })
+        .catch(err => {
+          console.error('❌ Could not send welcome email:', err)
+        })
+    } catch (err) {
+      console.error('❌ Welcome email error:', err)
+    }
+    
     return data.user
   }
 
