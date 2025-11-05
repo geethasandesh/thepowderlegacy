@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { saveOrder } from '../../services/db'
 import { recordCouponUsage } from '../../services/coupon-service'
 import { pushOrderToEcwid, recordFailedPaymentInEcwid } from '../../services/ecwid-integration'
+import { supabase } from '../../lib/supabase'
 
 function CheckoutPayment() {
   const navigate = useNavigate()
@@ -425,17 +426,51 @@ function CheckoutPayment() {
       // Continue with email and invoice even if Supabase fails
     }
 
-    // Push order to Ecwid (fire-and-forget, don't block on this)
+    // Push order to Ecwid automatically (runs in background)
+    // This sends the order to Ecwid so you can track it there
+    console.log('📦 Auto-sending order to Ecwid...')
     pushOrderToEcwid(orderData)
       .then(result => {
-        if (result.success) {
-          console.log('✅ Order synced to Ecwid successfully:', result)
+        if (result.success && result.ecwidOrderId) {
+          console.log('✅ Order sent to Ecwid successfully!')
+          console.log('   Ecwid Order ID:', result.ecwidOrderId)
+          console.log('   Order Number:', result.orderNumber)
+          
+          // Update Supabase order with Ecwid order ID for tracking
+          // Try to update, but don't fail if columns don't exist
+          supabase
+            .from('orders')
+            .update({ 
+              ecwid_order_id: result.ecwidOrderId.toString(),
+              fulfillment_status: 'AWAITING_PROCESSING'
+            })
+            .eq('order_id', orderId)
+            .then(({ error }) => {
+              if (error) {
+                // If columns don't exist, try without them
+                if (error.code === 'PGRST116' || error.message?.includes('column')) {
+                  console.log('⚠️ Ecwid columns not in Supabase schema - order saved but not linked')
+                } else {
+                  console.error('⚠️ Failed to update order with Ecwid ID:', error)
+                }
+              } else {
+                console.log('✅ Order linked to Ecwid for tracking')
+              }
+            })
+          
+          // Refresh orders list if on admin panel
+          if (window.location.pathname.includes('/admin')) {
+            window.dispatchEvent(new Event('ordersUpdated'))
+          }
         } else {
-          console.warn('⚠️ Failed to sync order to Ecwid:', result.error)
+          console.warn('⚠️ Order not sent to Ecwid:', result.error)
+          console.warn('   Order is saved in your database')
+          console.warn('   Restart backend server if you just updated tokens')
         }
       })
       .catch(error => {
-        console.error('❌ Error syncing to Ecwid:', error)
+        console.error('❌ Error sending order to Ecwid:', error)
+        console.error('   Order is saved in your database')
       })
 
     // Generate invoice and trigger download

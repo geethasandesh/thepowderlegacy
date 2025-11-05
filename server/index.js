@@ -5,6 +5,10 @@ import sendOrderEmailHandler from '../api/send-order-email.js'
 import sendFailedPaymentEmailHandler from '../api/send-failed-payment-email.js'
 import sendLeadEmailHandler from '../api/send-lead-email.js'
 import sendBulkEmailHandler from '../api/send-bulk-email.js'
+import pushOrderToEcwidHandler from '../api/push-order-to-ecwid.js'
+import syncEcwidOrdersHandler from '../api/sync-ecwid-orders.js'
+import updateEcwidOrderStatusHandler from '../api/update-ecwid-order-status.js'
+import checkEcwidTrackingHandler from '../api/check-ecwid-tracking.js'
 
 // Load environment variables
 dotenv.config()
@@ -60,6 +64,48 @@ app.post('/api/send-bulk-email', async (req, res) => {
   console.log('🌐 SERVER: Recipients count:', req.body.recipients?.length || 0)
   try {
     await sendBulkEmailHandler(req, res)
+  } catch (error) {
+    console.error('🌐 SERVER ERROR:', error)
+    res.status(500).json({ error: error.message || 'Internal server error' })
+  }
+})
+
+app.post('/api/push-order-to-ecwid', async (req, res) => {
+  console.log('🌐 SERVER: Received request to /api/push-order-to-ecwid')
+  console.log('🌐 SERVER: Order ID:', req.body.orderId)
+  try {
+    await pushOrderToEcwidHandler(req, res)
+  } catch (error) {
+    console.error('🌐 SERVER ERROR:', error)
+    res.status(500).json({ error: error.message || 'Internal server error' })
+  }
+})
+
+app.post('/api/sync-ecwid-orders', async (req, res) => {
+  console.log('🌐 SERVER: Received request to /api/sync-ecwid-orders')
+  try {
+    await syncEcwidOrdersHandler(req, res)
+  } catch (error) {
+    console.error('🌐 SERVER ERROR:', error)
+    res.status(500).json({ error: error.message || 'Internal server error' })
+  }
+})
+
+app.post('/api/update-ecwid-order-status', async (req, res) => {
+  console.log('🌐 SERVER: Received request to /api/update-ecwid-order-status')
+  console.log('🌐 SERVER: Order ID:', req.body.orderId, 'Status:', req.body.status)
+  try {
+    await updateEcwidOrderStatusHandler(req, res)
+  } catch (error) {
+    console.error('🌐 SERVER ERROR:', error)
+    res.status(500).json({ error: error.message || 'Internal server error' })
+  }
+})
+
+app.post('/api/check-ecwid-tracking', async (req, res) => {
+  console.log('🌐 SERVER: Received request to /api/check-ecwid-tracking')
+  try {
+    await checkEcwidTrackingHandler(req, res)
   } catch (error) {
     console.error('🌐 SERVER ERROR:', error)
     res.status(500).json({ error: error.message || 'Internal server error' })

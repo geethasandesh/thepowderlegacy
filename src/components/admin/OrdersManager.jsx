@@ -1,17 +1,36 @@
 import React, { useState, useEffect } from 'react'
-import { Package, Search, Filter, Download, Eye, X, Calendar, DollarSign, User, MapPin, ShoppingBag, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
+import { Package, Search, Filter, Download, Eye, X, Calendar, DollarSign, User, MapPin, ShoppingBag, CheckCircle, XCircle, Clock, AlertCircle, Box, Truck } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { updateOrderStatus } from '../../services/ecwid-order-tracking'
 
 function OrdersManager() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [showDetails, setShowDetails] = useState(false)
+  const [updatingStatus, setUpdatingStatus] = useState(null)
 
   useEffect(() => {
     fetchOrders()
+    
+    // Listen for order updates (when new order is created)
+    const handleOrdersUpdate = () => {
+      console.log('🔄 Refreshing orders list...')
+      fetchOrders()
+    }
+    
+    window.addEventListener('ordersUpdated', handleOrdersUpdate)
+    
+    // Refresh orders every 30 seconds to catch new orders
+    const refreshInterval = setInterval(() => {
+      fetchOrders()
+    }, 30000)
+    
+    return () => {
+      window.removeEventListener('ordersUpdated', handleOrdersUpdate)
+      clearInterval(refreshInterval)
+    }
   }, [])
 
   const fetchOrders = async () => {
@@ -31,9 +50,8 @@ function OrdersManager() {
     }
   }
 
-  const getStatusBadge = (order) => {
+  const getPaymentStatusBadge = (order) => {
     // Check if payment exists - if yes, it's successful
-    // Handle both null and empty string
     if (order.payment_id && order.payment_id.trim() !== '') {
       return {
         label: 'Paid',
@@ -48,6 +66,100 @@ function OrdersManager() {
     }
   }
 
+  const getFulfillmentStatusBadge = (order) => {
+    const status = order.fulfillment_status || 'AWAITING_PROCESSING'
+    
+    const statusMap = {
+      'AWAITING_PROCESSING': {
+        label: 'Awaiting Processing',
+        color: 'bg-gray-100 text-gray-800',
+        icon: <Clock size={14} />
+      },
+      'PACKED': {
+        label: 'Packed',
+        color: 'bg-blue-100 text-blue-800',
+        icon: <Box size={14} />
+      },
+      'SHIPPED': {
+        label: 'Shipped',
+        color: 'bg-purple-100 text-purple-800',
+        icon: <Truck size={14} />
+      },
+      'OUT_FOR_DELIVERY': {
+        label: 'Out for Delivery',
+        color: 'bg-orange-100 text-orange-800',
+        icon: <Truck size={14} />
+      },
+      'DELIVERED': {
+        label: 'Delivered',
+        color: 'bg-green-100 text-green-800',
+        icon: <CheckCircle size={14} />
+      },
+      'CANCELLED': {
+        label: 'Cancelled',
+        color: 'bg-red-100 text-red-800',
+        icon: <XCircle size={14} />
+      }
+    }
+    
+    return statusMap[status] || statusMap['AWAITING_PROCESSING']
+  }
+
+
+  const handleStatusUpdate = async (order, newStatus) => {
+    // Don't update if status hasn't changed
+    if (order.fulfillment_status === newStatus) {
+      return
+    }
+    
+    try {
+      setUpdatingStatus(order.order_id)
+      
+      // For shipped status, ask for tracking number
+      let trackingNumber = null
+      if (newStatus === 'SHIPPED') {
+        trackingNumber = prompt('Enter tracking number (optional):')
+        if (trackingNumber === null) {
+          setUpdatingStatus(null)
+          return // User cancelled
+        }
+        trackingNumber = trackingNumber.trim() || null
+      }
+      
+      console.log('🔄 Updating order status:', {
+        orderId: order.order_id,
+        ecwidOrderId: order.ecwid_order_id,
+        newStatus,
+        trackingNumber
+      })
+      
+      await updateOrderStatus(
+        order.order_id,
+        order.ecwid_order_id,
+        newStatus,
+        trackingNumber
+      )
+      
+      // Success message
+      const statusLabels = {
+        'PACKED': 'Packed',
+        'SHIPPED': 'Shipped',
+        'OUT_FOR_DELIVERY': 'Out for Delivery',
+        'DELIVERED': 'Delivered'
+      }
+      
+      alert(`✅ Order status updated to "${statusLabels[newStatus] || newStatus}"\n\n✅ Updated in Ecwid\n✅ Updated in database\n✅ Email sent to customer: ${order.shipping_address?.email || 'N/A'}`)
+      
+      // Refresh orders list to show new status
+      await fetchOrders()
+    } catch (error) {
+      console.error('❌ Failed to update status:', error)
+      alert(`❌ Failed to update status: ${error.message}\n\nPlease check:\n1. Backend server is running\n2. Ecwid credentials are correct\n3. App has update_orders scope`)
+    } finally {
+      setUpdatingStatus(null)
+    }
+  }
+
   const filteredOrders = orders.filter(order => {
     const matchesSearch = 
       order.order_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -55,10 +167,8 @@ function OrdersManager() {
       order.shipping_address?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.shipping_address?.lastName?.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const status = getStatusBadge(order).label.toLowerCase()
-    const matchesStatus = statusFilter === 'all' || status === statusFilter.toLowerCase()
-
-    return matchesSearch && matchesStatus
+    // Removed fulfillment status filter - only filter by search now
+    return matchesSearch
   })
 
   const exportToCSV = () => {
@@ -108,9 +218,13 @@ function OrdersManager() {
             {/* Status & Date */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {getStatusBadge(order).icon}
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(order).color}`}>
-                  {getStatusBadge(order).label}
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatusBadge(order).color}`}>
+                  {getPaymentStatusBadge(order).icon}
+                  {getPaymentStatusBadge(order).label}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getFulfillmentStatusBadge(order).color}`}>
+                  {getFulfillmentStatusBadge(order).icon}
+                  {getFulfillmentStatusBadge(order).label}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
@@ -327,16 +441,6 @@ function OrdersManager() {
           </div>
 
           <div className="flex gap-2 w-full md:w-auto">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-            >
-              <option value="all">All Status</option>
-              <option value="paid">Paid</option>
-              <option value="pending">Pending</option>
-            </select>
-
             <button
               onClick={exportToCSV}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
@@ -367,7 +471,7 @@ function OrdersManager() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Date</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Items</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Total</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Payment</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Actions</th>
                 </tr>
               </thead>
@@ -395,9 +499,9 @@ function OrdersManager() {
                       <span className="font-semibold text-gray-900">₹{order.totals?.total || 0}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(order).color}`}>
-                        {getStatusBadge(order).icon}
-                        {getStatusBadge(order).label}
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusBadge(order).color}`}>
+                        {getPaymentStatusBadge(order).icon}
+                        {getPaymentStatusBadge(order).label}
                       </span>
                     </td>
                     <td className="px-4 py-3">

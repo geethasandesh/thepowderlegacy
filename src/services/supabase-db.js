@@ -32,6 +32,7 @@ export async function saveContactMessage(message) {
 export async function saveOrder(order) {
   try {
     // Sanitize order data for Supabase
+    // Only include fields that exist in Supabase schema
     const sanitizedOrder = {
       order_id: String(order.orderId || ''),
       payment_id: String(order.paymentId || ''),
@@ -44,18 +45,46 @@ export async function saveOrder(order) {
       created_at: new Date().toISOString()
     }
 
+    // Only add these fields if they exist (they might not be in the schema yet)
+    // If Supabase table doesn't have these columns, they'll be ignored
+    if (order.ecwidOrderId !== undefined) {
+      sanitizedOrder.ecwid_order_id = order.ecwidOrderId
+    }
+    if (order.fulfillmentStatus !== undefined) {
+      sanitizedOrder.fulfillment_status = order.fulfillmentStatus || 'AWAITING_PROCESSING'
+    }
+
+    console.log('💾 Saving order to Supabase:', sanitizedOrder.order_id)
     const { data, error } = await supabase
       .from('orders')
       .insert(sanitizedOrder)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('❌ Supabase error details:', error)
+      // If error is about missing columns, try without them
+      if (error.code === 'PGRST116' || error.message?.includes('column') || error.message?.includes('does not exist')) {
+        console.log('⚠️ Retrying without optional columns...')
+        const { ecwid_order_id, fulfillment_status, ...basicOrder } = sanitizedOrder
+        const { data: retryData, error: retryError } = await supabase
+          .from('orders')
+          .insert(basicOrder)
+          .select()
+          .single()
+        
+        if (retryError) throw retryError
+        console.log('✅ Order saved to Supabase (without optional columns)')
+        return retryData
+      }
+      throw error
+    }
 
-    console.log('✅ Order saved to Supabase')
+    console.log('✅ Order saved to Supabase successfully')
     return data
   } catch (error) {
     console.error('❌ Error saving order:', error)
+    console.error('❌ Error details:', JSON.stringify(error, null, 2))
     throw error
   }
 }
