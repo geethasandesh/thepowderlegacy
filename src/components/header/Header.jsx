@@ -239,27 +239,20 @@ function Header() {
                 </div>
               ) : (
                 /* User Menu - Not Logged In */
-                <div className="hidden lg:flex items-center gap-2 ml-2">
-                  <Link 
-                    to="/login" 
-                    className="px-4 py-2 text-sm font-semibold text-[#2d5f3f] hover:bg-[#f5f5f4] rounded-lg transition-all"
-                  >
-                    Login
-                  </Link>
-                  <Link 
-                    to="/signup" 
-                    className="px-4 py-2 text-sm font-semibold bg-[#2d5f3f] text-white hover:bg-[#234d32] rounded-lg transition-all"
-                  >
-                    Sign Up
-                  </Link>
-                </div>
+                <Link 
+                  to="/login" 
+                  className="hidden lg:flex items-center gap-2 p-2.5 text-stone-700 hover:text-[#2d5f3f] hover:bg-[#f5f5f4] rounded-lg transition-all ml-2"
+                  aria-label="Login"
+                >
+                  <User size={20} />
+                </Link>
               )}
 
               {/* Mobile Account Button */}
               <Link 
-                to="/account" 
+                to={currentUser ? "/account" : "/login"} 
                 className="lg:hidden relative p-2.5 text-stone-700 hover:text-[#2d5f3f] hover:bg-[#f5f5f4] rounded-lg transition-all"
-                aria-label="Account"
+                aria-label={currentUser ? "Account" : "Login"}
               >
                 <User size={20} />
                 {profileName && (
