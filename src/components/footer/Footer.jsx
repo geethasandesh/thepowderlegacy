@@ -222,10 +222,17 @@ function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4">
-            <div className="text-xs sm:text-sm text-stone-300 text-center md:text-left">
-              © {currentYear} The Powder Legacy. All rights reserved. Made with{' '}
-              <Heart size={12} className="sm:w-3.5 sm:h-3.5 inline text-[#d4a574]" /> in India
+          <div className="flex flex-col items-center justify-center gap-3 sm:gap-4">
+            <div className="text-xs sm:text-sm text-stone-300 text-center">
+              © {currentYear} The Powder Legacy. All rights reserved. Developed by{' '}
+              <a 
+                href="https://www.grahmind.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[#d4a574] hover:underline transition-colors"
+              >
+                Grahmind Innovations
+              </a>
             </div>
             <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-xs text-stone-300">
               <div className="flex items-center gap-1 sm:gap-1.5">
